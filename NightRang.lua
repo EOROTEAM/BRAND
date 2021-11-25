@@ -3177,6 +3177,25 @@ KickGroup(result.chat_id_, result.sender_user_id_)
 end
 tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
+if text == 'معلومات السيرفر' or text == 'السيرفر' or text == '↫ السيرفر ᥀' then 
+if not RioSudo(msg) then
+Dev_Bots(msg.chat_id_, msg.id_, 1, '᥀︙للمطور الاساسي فقط ', 1, 'md')
+else
+Dev_Bots(msg.chat_id_, msg.id_, 1, io.popen([[
+LinuxVersion=`lsb_release -ds`
+MemoryUsage=`free -m | awk 'NR==2{printf "%s/%sMB {%.2f%%}\n", $3,$2,$3*100/$2 }'`
+HardDisk=`df -lh | awk '{if ($6 == "/") { print $3"/"$2" ~ {"$5"}" }}'`
+Percentage=`top -b -n1 | grep "Cpu(s)" | awk '{print $2 + $4}'`
+UpTime=`uptime | awk -F'( |,|:)+' '{if ($7=="min") m=$6; else {if ($7~/^day/) {d=$6;h=$8;m=$9} else {h=$6;m=$7}}} {print d+0,"days,",h+0,"hours,",m+0,"minutes"}'`
+echo '᥀︙نظام التشغيل ↫ ⤈\n`'"$LinuxVersion"'`' 
+echo '┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉\n᥀︙الذاكره العشوائيه ↫ ⤈\n`'"$MemoryUsage"'`'
+echo '┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉\n᥀︙وحدة التخزين ↫ ⤈\n`'"$HardDisk"'`'
+echo '┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉\n᥀︙المعالج ↫ ⤈\n`'"`grep -c processor /proc/cpuinfo`""Core ~ {$Percentage%} "'`'
+echo '┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉\n᥀︙الدخول ↫ ⤈\n`'`whoami`'`'
+echo '┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉ ┉\n᥀︙مدة تشغيل السيرفر ↫ ⤈\n`'"$UpTime"'`'
+]]):read('*a'), 1, 'md')
+end
+end
 
 if text == ("الغاء العام") and tonumber(msg.reply_to_message_id_) ~= 0 and DeveloperBot1(msg) then
 function FunctionStatus(arg, result)
@@ -7680,7 +7699,7 @@ end
 if text == 'السورس' or text == 'سورس' then
 Text = [[
 
-[𝚆𝚎𝚕𝚌𝚘𝚖 𝚝𝚘 𝙱𝚁𝙰𝙽𝙳](t.me/yousef_labban1)
+[𝚆𝚎𝚕𝚌𝚘𝚖 𝚝𝚘 𝙱𝚁𝙰𝙽𝙳](t.me/CXRCX)
  ━━━━━━━━━━━
 [𝙼𝚞𝚛𝚝𝚊𝚍𝚊 𝚖𝚘𝚑𝚊𝚖𝚖𝚎𝚍](t.me/BBBVVBV)
 
