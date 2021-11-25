@@ -6096,7 +6096,7 @@ local yazon = "•  عدد الادامن : "..data.administrator_count_..
 send(msg.chat_id_, msg.id_, yazon) 
 end,nil)end,nil)
 end
-if text == "غادر" and SudoBot(msg) then
+if text == "غادر" and Dev_Bots(msg) then
 local Leave = Dev_Bots:get(bot_id..'NightRang:Leave')
 local Text = [[
 *᥀︙هل انت متأكد من طرد البوت ؟*
