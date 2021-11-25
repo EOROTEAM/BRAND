@@ -6096,13 +6096,15 @@ local yazon = "•  عدد الادامن : "..data.administrator_count_..
 send(msg.chat_id_, msg.id_, yazon) 
 end,nil)end,nil)
 end
-if text == "غادر" then
- 
-if DeveloperBot(msg) and not redis:get(bot_id.."NightRang:Lock:Left"..msg.chat_id_) then 
-tdcli_function ({ID = "ChangeChatMemberStatus",chat_id_=msg.chat_id_,user_id_=bot_id,status_={ID = "ChatMemberStatusLeft"},},function(e,g) end, nil) 
-send(msg.chat_id_, msg.id_,"-") 
-redis:srem(bot_id.."NightRang:ChekBotAdd",msg.chat_id_)  
-end
+if text == "غادر" and SudoBot(msg) then
+local Leave = Dev_Bots:get(bot_id..'NightRang:Leave')
+local Text = [[
+*᥀︙هل انت متأكد من طرد البوت ؟*
+]] 
+keyboard = {} 
+keyboard.inline_keyboard = {{{text="نعم",callback_data="/LeaveBot:"..msg.sender_user_id_},{text="لا",callback_data="/NoLeaveBot:"..msg.sender_user_id_}}}
+Msg_id = msg.id_/2097152/0.5
+return https.request("https://api.telegram.org/bot"..TokenBot..'/sendMessage?chat_id='..msg.chat_id_..'&text=' .. URL.escape(Leave or Text).."&reply_to_message_id="..Msg_id.."&parse_mode=markdown&disable_web_page_preview=true&reply_markup="..JSON.encode(keyboard))
 end
 if text and text:match("^غادر (-%d+)$") then
 
