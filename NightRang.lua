@@ -3178,7 +3178,7 @@ end
 tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 if text == 'معلومات السيرفر' or text == 'السيرفر' or text == '↫ السيرفر ᥀' then 
-if not Sudos(msg) then
+if not Dev_Bots(msg) then
 Dev_Bots(msg.chat_id_, msg.id_, 1, '᥀︙للمطور الاساسي فقط ', 1, 'md')
 else
 Dev_Bots(msg.chat_id_, msg.id_, 1, io.popen([[
