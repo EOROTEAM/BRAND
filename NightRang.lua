@@ -7680,9 +7680,9 @@ end
 if text == 'السورس' or text == 'سورس' then
 Text = [[
 
-[Ch dev yousef](t.me/yousef_labban1)
-
-[مطور السورس ](t.me/yousef_labban)
+[𝚆𝚎𝚕𝚌𝚘𝚖 𝚝𝚘 𝙱𝚁𝙰𝙽𝙳](t.me/yousef_labban1)
+ ━━━━━━━━━━━
+[𝙼𝚞𝚛𝚝𝚊𝚍𝚊 𝚖𝚘𝚑𝚊𝚖𝚖𝚎𝚍](t.me/BBBVVBV)
 
 ]]
 send(msg.chat_id_, msg.id_,Text)
