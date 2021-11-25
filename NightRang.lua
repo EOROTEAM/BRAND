@@ -258,7 +258,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 function Get_Rank(user_id,chat_id)
 if Dev_Bots_User(user_id) == true then
-Status = "المطور الاساسي"  
+Status = "المطور"  
 elseif tonumber(user_id) == tonumber(bot_id) then  
 Status = "انا البوت :) "
 elseif redis:sismember(bot_id.."NightRang:Developer:Bot1", user_id) then
@@ -2756,7 +2756,7 @@ Text = [[
 
 [ CH . ](t.me/CXRCX)
 
-[ . مطور السورس ](t.me/t.me/BBBVVBV)
+[ . مطور السورس ](t.me/BBBVVBV)
 
 ]]
 send(msg.chat_id_, msg.id_,Text)
@@ -7680,9 +7680,9 @@ end
 if text == 'السورس' or text == 'سورس' then
 Text = [[
 
-[Ch dev yousef](t.me/BBBVVBV1)
+[Ch dev yousef](t.me/yousef_labban1)
 
-[مطور السورس ](t.me/BBBVVBV)
+[مطور السورس ](t.me/yousef_labban)
 
 ]]
 send(msg.chat_id_, msg.id_,Text)
