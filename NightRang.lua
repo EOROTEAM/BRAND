@@ -1,118 +1,127 @@
-http = require("socket.http")
-https = require("ssl.https")
-JSON = dofile("./lib/dkjson.lua")
-json = dofile("./lib/JSON.lua")
-URL = dofile("./lib/url.lua")
-serpent = dofile("./lib/serpent.lua")
-redis = dofile("./lib/redis.lua").connect("127.0.0.1", 6379)
-Server_Devid = io.popen("echo $SSH_CLIENT  awk '{ print $1}'"):read('*a')
-------------------------------------------------------------------------------------------------------------
-local function Load_File()
-local f = io.open("./Info_Sudo.lua", "r")  
-if not f then   
-if not redis:get(Server_Devid.."Token_Devbot") then
-io.write('\n\27[1;35mSend Token For Bot : ارسل توكككن البوت ...\n\27[0;39;49m')
-local token = io.read()
-if token ~= '' then
-local url , res = https.request('https://api.telegram.org/bot'..token..'/getMe')
-local User_Info_bot = JSON.decode(url) 
+--[[
+
+--]]
+URL     = require("./libs/url")
+JSON    = require("./libs/dkjson")
+serpent = require("libs/serpent")
+json = require('libs/json')
+Redis = require('libs/redis').connect('127.0.0.1', 6379)
+http  = require("socket.http")
+https   = require("ssl.https")
+local Methods = io.open("./luatele.lua","r")
+if Methods then
+URL.tdlua_CallBack()
+end
+SshId = io.popen("echo $SSH_CLIENT ︙ awk '{ print $1}'"):read('*a')
+luatele = require 'luatele'
+local FileInformation = io.open("./Information.lua","r")
+if not FileInformation then
+if not Redis:get(SshId.."Info:Redis:Token") then
+io.write('\27[1;31mارسل لي توكن البوت الان \nSend Me a Bot Token Now ↡\n\27[0;39;49m')
+local TokenBot = io.read()
+if TokenBot and TokenBot:match('(%d+):(.*)') then
+local url , res = https.request('https://api.telegram.org/bot'..TokenBot..'/getMe')
+local Json_Info = JSON.decode(url)
 if res ~= 200 then
-io.write('\n\27[1;31mToken Is Communication Error\n التوكن غلط جرب مره اخره \n\27[0;39;49m')
+print('\27[1;34mعذرا توكن البوت خطأ تحقق منه وارسله مره اخره \nBot Token is Wrong\n')
 else
-io.write('\n\27[1;31m• Done Save Token : تم حفظ التوكن \n\27[0;39;49m')
-redis:set(Server_Devid.."Token_Devbot",token)
-redis:set(Server_Devid.."Token_Devbotuser",User_Info_bot.result.username)
+io.write('\27[1;34mتم حفظ التوكن بنجاح \nThe token been saved successfully \n\27[0;39;49m')
+TheTokenBot = TokenBot:match("(%d+)")
+os.execute('sudo rm -fr .CallBack-Bot/'..TheTokenBot)
+Redis:set(SshId.."Info:Redis:Token",TokenBot)
+Redis:set(SshId.."Info:Redis:Token:User",Json_Info.result.username)
 end 
 else
-io.write('\n\27[1;31mToken was not saved \n لم يتم حفظ التوكن \n\27[0;39;49m')
-end 
-os.execute('lua NightRang.lua')
-end
-------------------------------------------------------------------------------------------------------------
-if not redis:get(Server_Devid.."User_Devbots1") then
-io.write('\n\27[1;35m⬇Send UserName For Sudo : ارسل معرف المطور ...\n\27[0;39;49m')
-local User_Sudo = io.read()
-if User_Sudo ~= '' then
-io.write('\n\27[1;31m◦ The UserNamr Is Saved : تم حفظ معرف Commander  واستخراج ايدي Commander \n\27[0;39;49m')
-redis:set(Server_Devid.."User_Devbots1",User_Sudo)
-else
-io.write('\n\27[1;31mThe UserName was not Saved : لم يتم حفظ معرف المطور\n\27[0;39;49m')
+print('\27[1;34mلم يتم حفظ التوكن جرب مره اخره \nToken not saved, try again')
 end 
 os.execute('lua NightRang.lua')
 end
-if not redis:get(Server_Devid.."Id_Devbotsid") then
-io.write('\n\27[1;35m⬇Send id For Sudo : ارسل ايدي المطور ...\n\27[0;39;49m')
-local User_Sudo = io.read()
-if User_Sudo ~= '' then
-io.write('\n\27[1;31m◦ The id Is Saved : تم حفظ ايدي Commander  واستخراج ايدي Commander \n\27[0;39;49m')
-redis:set(Server_Devid.."Id_Devbotsid",User_Sudo)
+if not Redis:get(SshId.."Info:Redis:User") then
+io.write('\27[1;31mارسل معرف المطور الاساسي الان \nDeveloper UserName saved ↡\n\27[0;39;49m')
+local UserSudo = io.read():gsub('@','')
+if UserSudo ~= '' then
+io.write('\n\27[1;34mتم حفظ معرف المطور \nDeveloper UserName saved \n\n\27[0;39;49m')
+Redis:set(SshId.."Info:Redis:User",UserSudo)
 else
-io.write('\n\27[1;31mThe id was not Saved : لم يتم حفظ ايدي المطور\n\27[0;39;49m')
+print('\n\27[1;34mلم يتم حفظ معرف المطور الاساسي \nDeveloper UserName not saved\n')
 end 
 os.execute('lua NightRang.lua')
 end
-
-------------------------------------------------------------------------------------------------------------
-local Dev_Info_Sudo = io.open("Info_Sudo.lua", 'w')
-Dev_Info_Sudo:write([[
-do 
-local File_Info = {
-id_dev = ]]..redis:get(Server_Devid.."Id_Devbotsid")..[[,
-UserName_dev = "]]..redis:get(Server_Devid.."User_Devbots1")..[[",
-Token_Bot = "]]..redis:get(Server_Devid.."Token_Devbot")..[["
+if not Redis:get(SshId.."Info:Redis:User:ID") then
+io.write('\27[1;31mارسل ايدي المطور الاساسي الان \nDeveloper ID saved ↡\n\27[0;39;49m')
+local UserId = io.read()
+if UserId and UserId:match('(%d+)') then
+io.write('\n\27[1;34mتم حفظ ايدي المطور \nDeveloper ID saved \n\n\27[0;39;49m')
+Redis:set(SshId.."Info:Redis:User:ID",UserId)
+else
+print('\n\27[1;34mلم يتم حفظ ايدي المطور الاساسي \nDeveloper ID not saved\n')
+end 
+os.execute('lua NightRang.lua')
+end
+local Informationlua = io.open("Information.lua", 'w')
+Informationlua:write([[
+return {
+Token = "]]..Redis:get(SshId.."Info:Redis:Token")..[[",
+UserBot = "]]..Redis:get(SshId.."Info:Redis:Token:User")..[[",
+UserSudo = "]]..Redis:get(SshId.."Info:Redis:User")..[[",
+SudoId = ]]..Redis:get(SshId.."Info:Redis:User:ID")..[[
 }
-return File_Info
-end
-
 ]])
-Dev_Info_Sudo:close()
-------------------------------------------------------------------------------------------------------------
-local Run_File_NightRang = io.open("NightRang", 'w')
-Run_File_NightRang:write([[
-#!/usr/bin/env bash
-cd $HOME/]]..redis:get(Server_Devid.."Token_Devbotuser")..[[
-
-token="]]..redis:get(Server_Devid.."Token_Devbot")..[["
+Informationlua:close()
+local NightRang = io.open("NightRang", 'w')
+NightRang:write([[
+cd $(cd $(dirname $0); pwd)
 while(true) do
-rm -fr ../.telegram-cli
-./tg -s ./NightRang.lua -p PROFILE --bot=$token
+sudo lua5.3 NightRang.lua
 done
 ]])
-Run_File_NightRang:close()
-------------------------------------------------------------------------------------------------------------
-local Run_SM = io.open("NG", 'w')
-Run_SM:write([[
-#!/usr/bin/env bash
-cd $HOME/]]..redis:get(Server_Devid.."Token_Devbotuser")..[[
-
+NightRang:close()
+local Run = io.open("Run", 'w')
+Run:write([[
+cd $(cd $(dirname $0); pwd)
 while(true) do
-rm -fr ../.telegram-cli
-screen -S ]]..redis:get(Server_Devid.."Token_Devbotuser")..[[ -X kill
-
-screen -S ]]..redis:get(Server_Devid.."Token_Devbotuser")..[[ ./NightRang
-
+screen -S NightRang -X kill
+screen -S NightRang ./NightRang
 done
 ]])
-Run_SM:close()
-local CmdRun =[[
-chmod +x tg
-chmod +x NightRang
-chmod +x ./NG
-cp -a ../NightRang ../]]..redis:get(Server_Devid.."Token_Devbotuser")..[[ &&
-rm -fr ~/NightRang
-../]]..redis:get(Server_Devid.."Token_Devbotuser")..[[/NG
-]]
-os.execute(CmdRun)
-
-Status = true
-else   
-f:close()  
-redis:del(Server_Devid.."Token_Devbot");redis:del(Server_Devid.."Id_Devbotsid");redis:del(Server_Devid.."User_Devbots1")
-Status = false
-end  
-return Status
+Run:close()
+Redis:del(SshId.."Info:Redis:User:ID");Redis:del(SshId.."Info:Redis:User");Redis:del(SshId.."Info:Redis:Token:User");Redis:del(SshId.."Info:Redis:Token")
+os.execute('chmod +x NightRang;chmod +x Run;./Run')
 end
-Load_File()
+Information = dofile('./Information.lua')
+Sudo_Id = Information.SudoId
+UserSudo = Information.UserSudo
+Token = Information.Token
+UserBot = Information.UserBot
+NightRang = Token:match("(%d+)")
+os.execute('sudo rm -fr .CallBack-Bot/'..NightRang)
+LuaTele = luatele.set_config{api_id=2692371,api_hash='fe85fff033dfe0f328aeb02b4f784930',session_name=NightRang,token=Token}
+function var(value)  
+print(serpent.block(value, {comment=false}))   
+end 
+function chat_type(ChatId)
+if ChatId then
+local id = tostring(ChatId)
+if id:match("-100(%d+)") then
+Chat_Type = 'GroupBot' 
+elseif id:match("^(%d+)") then
+Chat_Type = 'UserBot' 
+else
+Chat_Type = 'GroupBot' 
+end
+end
+return Chat_Type
+end
+function The_ControllerAll(UserId)
+ControllerAll = false
+local ListSudos ={Sudo_Id,100100900}  
+for k, v in pairs(ListSudos) do
+if tonumber(UserId) == tonumber(v) then
+ControllerAll = true
+end
+end
+return ControllerAll
+end
 ------------------------------------------------------------------------------------------------------------
 sudos = dofile("./Info_Sudo.lua")
 token = sudos.Token_Bot
@@ -339,7 +348,7 @@ local text2 = redis:get(bot_id..'NightRang:new:sourse2') or '•'
 text = string.gsub(text,"━━━━━━━━",text1)
 text = string.gsub(text,"•",text2)
 local TextParseMode = {ID = "TextParseModeMarkdown"}
-pcall(tdcli_function ({ID = "SendMessage",chat_id_ = chat_id,reply_to_message_id_ = reply_to_message_id,disable_notification_ = 1,from_background_ = 1,reply_markup_ = nil,input_message_content_ = {ID = "InputMessageText",text_ = text,disable_web_page_preview_ = 1,clear_draft_ = 0,entities_ = {},parse_mode_ = TextParseMode,},}, dl_cb, nil))
+pcall(LuaTele ({ID = "SendMessage",chat_id_ = chat_id,reply_to_message_id_ = reply_to_message_id,disable_notification_ = 1,from_background_ = 1,reply_markup_ = nil,input_message_content_ = {ID = "InputMessageText",text_ = text,disable_web_page_preview_ = 1,clear_draft_ = 0,entities_ = {},parse_mode_ = TextParseMode,},}, dl_cb, nil))
 end
 function send1(chat_id, reply_to_message_id, text)
 local text1 = redis:get(bot_id..'NightRang:new:sourse1') or '━━━━━━━━'
@@ -347,15 +356,15 @@ local text2 = redis:get(bot_id..'NightRang:new:sourse2') or '•'
 text = string.gsub(text,"━━━━━━━━",text1)
 text = string.gsub(text,"•",text2)
 local TextParseMode = {ID = "TextParseModeMarkdown"}
-pcall(tdcli_function ({ID = "SendMessage",chat_id_ = chat_id,reply_to_message_id_ = reply_to_message_id,disable_notification_ = 1,from_background_ = 1,reply_markup_ = nil,input_message_content_ = {ID = "InputMessageText",text_ = text,disable_web_page_preview_ = 0,clear_draft_ = 0,entities_ = {},parse_mode_ = TextParseMode,},}, dl_cb, nil))
+pcall(LuaTele ({ID = "SendMessage",chat_id_ = chat_id,reply_to_message_id_ = reply_to_message_id,disable_notification_ = 1,from_background_ = 1,reply_markup_ = nil,input_message_content_ = {ID = "InputMessageText",text_ = text,disable_web_page_preview_ = 0,clear_draft_ = 0,entities_ = {},parse_mode_ = TextParseMode,},}, dl_cb, nil))
 end
 function send2(chat_id, reply_to_message_id, text)
 local TextParseMode = {ID = "TextParseModeMarkdown"}
-pcall(tdcli_function ({ID = "SendMessage",chat_id_ = chat_id,reply_to_message_id_ = reply_to_message_id,disable_notification_ = 1,from_background_ = 1,reply_markup_ = nil,input_message_content_ = {ID = "InputMessageText",text_ = text,disable_web_page_preview_ = 0,clear_draft_ = 0,entities_ = {},parse_mode_ = TextParseMode,},}, dl_cb, nil))
+pcall(LuaTele ({ID = "SendMessage",chat_id_ = chat_id,reply_to_message_id_ = reply_to_message_id,disable_notification_ = 1,from_background_ = 1,reply_markup_ = nil,input_message_content_ = {ID = "InputMessageText",text_ = text,disable_web_page_preview_ = 0,clear_draft_ = 0,entities_ = {},parse_mode_ = TextParseMode,},}, dl_cb, nil))
 end
 ------------------------------------------------------------------------------------------------------------
 function Delete_Message(chat,id)
-pcall(tdcli_function ({
+pcall(LuaTele ({
 ID="DeleteMessages",
 chat_id_=chat,
 message_ids_=id
@@ -364,7 +373,7 @@ end,nil))
 end
 ------------------------------------------------------------------------------------------------------------
 function DeleteMessage_(chat,id,func)
-pcall(tdcli_function ({
+pcall(LuaTele ({
 ID="DeleteMessages",
 chat_id_=chat,
 message_ids_=id
@@ -465,7 +474,7 @@ return infile
 end
 ------------------------------------------------------------------------------------------------------------
 function sendPhoto(chat_id,reply_id,photo,caption,func)
-pcall(tdcli_function({
+pcall(LuaTele({
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -484,7 +493,7 @@ caption_ = caption or ""
 end
 ------------------------------------------------------------------------------------------------------------
 function sendVoice(chat_id,reply_id,voice,caption,func)
-pcall(tdcli_function({
+pcall(LuaTele({
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -501,7 +510,7 @@ caption_ = caption or ""
 end
 ------------------------------------------------------------------------------------------------------------
 function sendAnimation(chat_id,reply_id,animation,caption,func)
-pcall(tdcli_function({
+pcall(LuaTele({
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -518,7 +527,7 @@ caption_ = caption or ""
 end
 ------------------------------------------------------------------------------------------------------------
 function sendAudio(chat_id,reply_id,audio,title,caption,func)
-pcall(tdcli_function({
+pcall(LuaTele({
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -536,7 +545,7 @@ caption_ = caption or ""
 end
 ------------------------------------------------------------------------------------------------------------
 function sendSticker(chat_id,reply_id,sticker,func)
-pcall(tdcli_function({
+pcall(LuaTele({
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -552,7 +561,7 @@ height_ = 0
 end
 ------------------------------------------------------------------------------------------------------------
 function sendVideo(chat_id,reply_id,video,caption,func)
-pcall(tdcli_function({ 
+pcall(LuaTele({ 
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -571,7 +580,7 @@ caption_ = caption or ""
 end
 ------------------------------------------------------------------------------------------------------------
 function sendDocument(chat_id,reply_id,document,caption,func)
-pcall(tdcli_function({
+pcall(LuaTele({
 ID="SendMessage",
 chat_id_ = chat_id,
 reply_to_message_id_ = reply_id,
@@ -586,7 +595,7 @@ caption_ = caption
 end
 ------------------------------------------------------------------------------------------------------------
 function KickGroup(chat,user)
-pcall(tdcli_function ({
+pcall(LuaTele ({
 ID = "ChangeChatMemberStatus",
 chat_id_ = chat,
 user_id_ = user,
@@ -594,7 +603,7 @@ status_ = {ID = "ChatMemberStatusKicked"},},function(arg,data) end,nil))
 end
 ------------------------------------------------------------------------------------------------------------
 function Send_Options(msg,user_id,status,text)
-tdcli_function ({ID = "GetUser",user_id_ = user_id},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = user_id},function(arg,data) 
 if data.first_name_ ~= false then
 local UserName = (data.username_ or "ramses20")
 for gmatch in string.gmatch(data.first_name_, "[^%s]+") do
@@ -634,7 +643,7 @@ end
 end,nil)   
 end
 function Send_Optionspv(chat,idmsg,user_id,status,text)
-tdcli_function ({ID = "GetUser",user_id_ = user_id},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = user_id},function(arg,data) 
 if data.first_name_ ~= false then
 local UserName = (data.username_ or "ramses20")
 for gmatch in string.gmatch(data.first_name_, "[^%s]+") do
@@ -1360,7 +1369,7 @@ end
 local status_welcome = redis:get(bot_id.."NightRang:Chek:Welcome"..msg.chat_id_)
 if status_welcome and not redis:get(bot_id.."NightRang:Lock:tagservr"..msg.chat_id_) then
 if msg.content_.ID == "MessageChatJoinByLink" or msg.content_.ID == "MessageChatAddMembers" then
-tdcli_function({ID = "GetUser",user_id_=msg.sender_user_id_},function(extra,result) 
+LuaTele({ID = "GetUser",user_id_=msg.sender_user_id_},function(extra,result) 
 local GetWelcomeGroup = redis:get(bot_id.."NightRang:Get:Welcome:Group"..msg.chat_id_)  
 if GetWelcomeGroup then 
 t = GetWelcomeGroup
@@ -1440,7 +1449,7 @@ photo_id = msg.content_.photo_.sizes_[3].photo_.persistent_id_
 else 
 photo_id = msg.content_.photo_.sizes_[0].photo_.persistent_id_ 
 end 
-tdcli_function ({ID = "ChangeChatPhoto",chat_id_ = msg.chat_id_,photo_ = getInputFile(photo_id) }, function(arg,data)   
+LuaTele ({ID = "ChangeChatPhoto",chat_id_ = msg.chat_id_,photo_ = getInputFile(photo_id) }, function(arg,data)   
 if data.code_ == 3 then
 send(msg.chat_id_, msg.id_,"• عذرا البوت ليس ادمن يرجى ترقيتي والمحاولة لاحقا") 
 redis:del(bot_id.."NightRang:Set:Chat:Photo"..msg.chat_id_..":"..msg.sender_user_id_) 
@@ -1614,7 +1623,7 @@ if msg.forward_info_ then
 local list = redis:smembers(bot_id.."NightRang:ChekBotAdd")   
 send(msg.chat_id_, msg.id_,"• تم التوجيه الى *- "..#list.." * مجموعة في البوت ")     
 for k,v in pairs(list) do  
-tdcli_function({ID="ForwardMessages",
+LuaTele({ID="ForwardMessages",
 chat_id_ = v,
 from_chat_id_ = msg.chat_id_,
 message_ids_ = {[0] = msg.id_},
@@ -1636,7 +1645,7 @@ if msg.forward_info_ then
 local list = redis:smembers(bot_id.."NightRang:Num:User:Pv")   
 send(msg.chat_id_, msg.id_,"• تم التوجيه الى *- "..#list.." * مجموعة في البوت ")     
 for k,v in pairs(list) do  
-tdcli_function({ID="ForwardMessages",
+LuaTele({ID="ForwardMessages",
 chat_id_ = v,
 from_chat_id_ = msg.chat_id_,
 message_ids_ = {[0] = msg.id_},
@@ -1837,7 +1846,7 @@ if msg.content_.ID == 'MessageSticker' and not Owner(msg) then
 local filter = redis:smembers(bot_id.."filtersteckr"..msg.chat_id_)
 for k,v in pairs(filter) do
 if v == msg.content_.sticker_.set_id_ then
-tdcli_function({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
+LuaTele({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
 if data.username_ ~= false then
 send(msg.chat_id_,0, "•عذرا يا ⇠ [@"..data.username_.."]\n•  الملصق الذي ارسلته تم منعه من المجموعة \n" ) 
 else
@@ -1855,7 +1864,7 @@ if msg.content_.ID == 'MessagePhoto' and not Owner(msg) then
 local filter = redis:smembers(bot_id.."filterphoto"..msg.chat_id_)
 for k,v in pairs(filter) do
 if v == msg.content_.photo_.id_ then
-tdcli_function({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
+LuaTele({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
 if data.username_ ~= false then
 send(msg.chat_id_,0,"•عذرا يا ⇠ [@"..data.username_.."]\n• الصورة التي ارسلتها تم منعها من المجموعة \n" ) 
 else
@@ -1872,7 +1881,7 @@ if msg.content_.ID == 'MessageAnimation' and not Owner(msg) then
 local filter = redis:smembers(bot_id.."filteranimation"..msg.chat_id_)
 for k,v in pairs(filter) do
 if v == msg.content_.animation_.animation_.persistent_id_ then
-tdcli_function({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
+LuaTele({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
 if data.username_ ~= false then
 send(msg.chat_id_,0,"•عذرا يا ⇠ [@"..data.username_.."]\n• المتحركه التي ارسلتها تم منعها من المجموعة \n") 
 else
@@ -2075,7 +2084,7 @@ local video = redis:get(bot_id.."NightRang:Add:Rd:Sudo:Video"..text)
 local document = redis:get(bot_id.."NightRang:Add:Rd:Sudo:File"..text)
 local audio = redis:get(bot_id.."NightRang:Add:Rd:Sudo:Audio"..text)
 if Text then 
-tdcli_function({ID="GetUser",user_id_=msg.sender_user_id_},function(arg,data)
+LuaTele({ID="GetUser",user_id_=msg.sender_user_id_},function(arg,data)
 local NumMsg = redis:get(bot_id..'NightRang:Num:Message:User'..msg.chat_id_..':'..msg.sender_user_id_) or 0
 local TotalMsg = Total_message(NumMsg)
 local Status_Gps = Get_Rank(msg.sender_user_id_,msg.chat_id_)
@@ -2122,7 +2131,7 @@ local video = redis:get(bot_id.."NightRang:Add:Rd:Manager:Video"..text..msg.chat
 local document = redis:get(bot_id.."NightRang:Add:Rd:Manager:File"..text..msg.chat_id_)
 local audio = redis:get(bot_id.."NightRang:Add:Rd:Manager:Audio"..text..msg.chat_id_)
 if Text then 
-tdcli_function({ID="GetUser",user_id_=msg.sender_user_id_},function(arg,data)
+LuaTele({ID="GetUser",user_id_=msg.sender_user_id_},function(arg,data)
 local NumMsg = redis:get(bot_id..'NightRang:Num:Message:User'..msg.chat_id_..':'..msg.sender_user_id_) or 0
 local TotalMsg = Total_message(NumMsg)
 local Status_Gps = Get_Rank(msg.sender_user_id_,msg.chat_id_)
@@ -2320,7 +2329,7 @@ redis:del(bot_id.."add:ch:jm" .. msg.chat_id_ .. "" .. msg.sender_user_id_)
 return false  end 
 redis:del(bot_id.."add:ch:jm" .. msg.chat_id_ .. "" .. msg.sender_user_id_)  
 local username = string.match(text, "@[%a%d_]+") 
-tdcli_function ({    
+LuaTele ({    
 ID = "SearchPublicChat",    
 username_ = username  
 },function(arg,data) 
@@ -2405,9 +2414,9 @@ if not Dev_Bots(msg) and not redis:sismember(bot_id..'NightRang:User:Ban:Pv',msg
 send(msg.sender_user_id_,msg.id_,'• تم ارسال رسالتك \n معرف ال المطور  ←  [@'..UserName_Dev..'] ')    
 local List_id = {Id_Dev,msg.sender_user_id_}
 for k,v in pairs(List_id) do   
-tdcli_function({ID="GetChat",chat_id_=v},function(arg,chat) end,nil)
+LuaTele({ID="GetChat",chat_id_=v},function(arg,chat) end,nil)
 end
-tdcli_function({ID="ForwardMessages",chat_id_=Id_Dev,from_chat_id_= msg.sender_user_id_,message_ids_={[0]=msg.id_},disable_notification_=1,from_background_=1},function(arg,data) 
+LuaTele({ID="ForwardMessages",chat_id_=Id_Dev,from_chat_id_= msg.sender_user_id_,message_ids_={[0]=msg.id_},disable_notification_=1,from_background_=1},function(arg,data) 
 if data and data.messages_ and data.messages_[0] ~= false and data.ID ~= "Error" then
 if data and data.messages_ and data.messages_[0].content_.sticker_ then
 Send_Optionspv(Id_Dev,0,msg.sender_user_id_,"reply_Pv","• قام بارسال الملصق")  
@@ -2418,7 +2427,7 @@ end,nil)
 end
 if Dev_Bots(msg) then 
 if msg.reply_to_message_id_ ~= 0  then    
-tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)},function(extra, result, success) 
+LuaTele({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)},function(extra, result, success) 
 if result.forward_info_.sender_user_id_ then     
 UserForward = result.forward_info_.sender_user_id_    
 end     
@@ -2432,8 +2441,8 @@ redis:srem(bot_id..'NightRang:User:Ban:Pv',UserForward)
 Send_Optionspv(Id_Dev,msg.id_,UserForward,"reply_Pv","• تم الغاء الحظره من تواصل البوت")   
 return false  
 end 
-tdcli_function({ID='GetChat',chat_id_=UserForward},function(a,s) end,nil)
-tdcli_function({ID="SendChatAction",chat_id_=UserForward,action_={ID="SendMessageTypingAction",progress_=100}},function(arg,Get_Status) 
+LuaTele({ID='GetChat',chat_id_=UserForward},function(a,s) end,nil)
+LuaTele({ID="SendChatAction",chat_id_=UserForward,action_={ID="SendMessageTypingAction",progress_=100}},function(arg,Get_Status) 
 if (Get_Status.code_) == (400) or (Get_Status.code_) == (5) then
 Send_Optionspv(Id_Dev,msg.id_,UserForward,"reply_Pv","• قام بحظر البوت لا تستطيع ارسال له رسائل")  
 return false  
@@ -2718,7 +2727,7 @@ return send(msg.chat_id_, msg.id_,"• لا يوجد محظورين عام")
 end
 Gban = "\n• قائمة المحظورين عام في البوت\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -2738,7 +2747,7 @@ return send(msg.chat_id_, msg.id_,"• لا يوجد مكتومين عام")
 end
 Gban = "\n• قائمة المكتومين عام في البوت\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -2769,7 +2778,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد Commander ")
 end
 Sudos = "\n• قائمة Commander  في البوت \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -2789,7 +2798,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد Commander ")
 end
 Sudos = "\n• قائمة Commander في البوت \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -2814,8 +2823,8 @@ if text == "مسح المشتركين" then
 local pv = redis:smembers(bot_id..'NightRang:Num:User:Pv')  
 local sendok = 0
 for i = 1, #pv do
-tdcli_function({ID='GetChat',chat_id_ = pv[i]},function(arg,dataq)
-tdcli_function ({ ID = "SendChatAction",chat_id_ = pv[i], action_ = {  ID = "SendMessageTypingAction", progress_ = 100} },function(arg,data) 
+LuaTele({ID='GetChat',chat_id_ = pv[i]},function(arg,dataq)
+LuaTele ({ ID = "SendChatAction",chat_id_ = pv[i], action_ = {  ID = "SendMessageTypingAction", progress_ = 100} },function(arg,data) 
 if data.ID and data.ID == "Ok"  then
 else
 redis:srem(bot_id..'NightRang:Num:User:Pv',pv[i])  
@@ -2839,7 +2848,7 @@ local group = redis:smembers(bot_id..'NightRang:ChekBotAdd')
 local w = 0
 local q = 0
 for i = 1, #group do
-tdcli_function({ID='GetChat',chat_id_ = group[i]
+LuaTele({ID='GetChat',chat_id_ = group[i]
 },function(arg,data)
 if data and data.type_ and data.type_.channel_ and data.type_.channel_.status_ and data.type_.channel_.status_.ID == "ChatMemberStatusMember" then
 redis:srem(bot_id..'NightRang:ChekBotAdd',group[i])  
@@ -2923,7 +2932,7 @@ end
 
 if text and text:match("رفع (.*)") and tonumber(msg.reply_to_message_id_) > 0 then 
 local mohammed = text:match("رفع (.*)")
-tdcli_function({ID="GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(extra,result)
+LuaTele({ID="GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(extra,result)
 local statusrt = redis:get(bot_id.."NightRang:botsAdd:Validity:Group:Rt"..mohammed) or redis:get(bot_id.."NightRang:Add:Validity:Group:Rt"..mohammed..msg.chat_id_)
 if  statusrt == "مميز" then
 if not redis:get(bot_id..'NightRang:Cheking:Seted'..msg.chat_id_) and not Owner(msg) then
@@ -2963,7 +2972,7 @@ end
 if text and text:match("تنزيل (.*)") and tonumber(msg.reply_to_message_id_) > 0 then 
 local mohammed = text:match("تنزيل (.*)")
 local statusrt = redis:get(bot_id.."NightRang:botsAdd:Validity:Group:Rt"..mohammed) or redis:get(bot_id.."NightRang:Add:Validity:Group:Rt"..mohammed..msg.chat_id_)
-tdcli_function({ID="GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(extra,result)
+LuaTele({ID="GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(extra,result)
 if  statusrt == "مميز" then
 if not Admin(msg) then
 return send(msg.chat_id_,msg.id_,'*• عذرآ هاذا الامر يخص : الادامن فقط *')
@@ -2997,7 +3006,7 @@ if text and text:match("^رفع (.*) @(.*)") then
 local Text = {string.match(text, "^(رفع) (.*) @(.*)$")}
 local mohammed = Text[2]
 local statusrt = redis:get(bot_id.."NightRang:botsAdd:Validity:Group:Rt"..mohammed) or redis:get(bot_id.."NightRang:Add:Validity:Group:Rt"..mohammed..msg.chat_id_)
-tdcli_function({ID="SearchPublicChat",username_=Text[3]},function(extra,result)
+LuaTele({ID="SearchPublicChat",username_=Text[3]},function(extra,result)
 if (result.id_) then
 if (result and result.type_ and result.type_.ID == "ChannelChatInfo") then
 return send(msg.chat_id_,msg.id_,"*• عذرا هاذا معرف قناة*")    
@@ -3044,7 +3053,7 @@ if text and text:match("^تنزيل (.*) @(.*)") then
 local Text = {string.match(text, "^(تنزيل) (.*) @(.*)$")}
 local mohammed = Text[2]
 local statusrt = redis:get(bot_id.."NightRang:botsAdd:Validity:Group:Rt"..mohammed) or redis:get(bot_id.."NightRang:Add:Validity:Group:Rt"..mohammed..msg.chat_id_)
-tdcli_function({ID="SearchPublicChat",username_=Text[3]},function(extra,result)
+LuaTele({ID="SearchPublicChat",username_=Text[3]},function(extra,result)
 if (result.id_) then
 if (result and result.type_ and result.type_.ID == "ChannelChatInfo") then
 return send(msg.chat_id_,msg.id_,"*• عذرا هاذا معرف قناة*")    
@@ -3119,7 +3128,7 @@ https.request("https://api.telegram.org/bot"..token.."/restrictChatMember?chat_i
 end
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = TextEnd[4]}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = TextEnd[4]}, FunctionStatus, nil)
 end
 if text and text:match('^تقييد (%d+) (.*)$') and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) then
 local TextEnd = {string.match(text, "^(تقييد) (%d+) (.*)$")}
@@ -3150,7 +3159,7 @@ Send_Options(msg,result.sender_user_id_,"reply", "• تم تقييده لمدة
 https.request("https://api.telegram.org/bot"..token.."/restrictChatMember?chat_id="..msg.chat_id_.."&user_id="..result.sender_user_id_..'&until_date='..tonumber(msg.date_+Time))
 end
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("حظر عام") and tonumber(msg.reply_to_message_id_) ~= 0 and DeveloperBot1(msg) then
@@ -3175,7 +3184,7 @@ Send_Options(msg,result.sender_user_id_,"reply","تم حظره عام من ال�
 redis:sadd(bot_id.."NightRang:Removal:User:Groups", result.sender_user_id_)
 KickGroup(result.chat_id_, result.sender_user_id_)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 if text == 'معلومات السيرفر' or text == 'السيرفر' or text == '↫ السيرفر ᥀' then 
 if not Dev_Bots(msg) then
@@ -3202,7 +3211,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Removal:User:Groups", result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم الغاء الحظره عام من المجموعات")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("كتم عام") and tonumber(msg.reply_to_message_id_) ~= 0 and DeveloperBot1(msg) then
@@ -3228,7 +3237,7 @@ Send_Options(msg,result.sender_user_id_,"reply","تم كتمه عام من ال�
 redis:sadd(bot_id.."NightRang:Silence:User:Groups", result.sender_user_id_)
 KickGroup(result.chat_id_, result.sender_user_id_)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("الغاء الكتم العام") and tonumber(msg.reply_to_message_id_) ~= 0 and Dev_Bots(msg) then
@@ -3236,7 +3245,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Silence:User:Groups", result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم الغاء الكتمه عام من المجموعات")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("حظر") and msg.reply_to_message_id_ ~= 0 and Admin(msg) then
@@ -3252,7 +3261,7 @@ function FunctionStatus(arg, result)
 if Rank_Checking(result.sender_user_id_, msg.chat_id_) == true then
 send(msg.chat_id_, msg.id_, "\nلا تستطيع  حظر : "..Get_Rank(result.sender_user_id_,msg.chat_id_).." ")
 else
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.sender_user_id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.sender_user_id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
 if (data and data.code_ and data.code_ == 400 and data.message_ == "CHAT_ADMIN_REQUIRED") then 
 send(msg.chat_id_, msg.id_,"لا توجد لدي صلاحية حظر المستخدمين") 
 return false  
@@ -3263,7 +3272,7 @@ Send_Options(msg,result.sender_user_id_,"reply","تم حظره من المجمو
 end,nil)   
 end
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("طرد") and msg.reply_to_message_id_ ~= 0 and Admin(msg) then
@@ -3279,7 +3288,7 @@ function FunctionStatus(arg, result)
 if Rank_Checking(result.sender_user_id_, msg.chat_id_) == true then
 send(msg.chat_id_, msg.id_, "\nلا تستطيع طرد : "..Get_Rank(result.sender_user_id_,msg.chat_id_).." ")
 else
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.sender_user_id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.sender_user_id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
 if (data and data.code_ and data.code_ == 400 and data.message_ == "CHAT_ADMIN_REQUIRED") then 
 send(msg.chat_id_, msg.id_,"لا توجد لدي صلاحية طرد المستخدمين") 
 return false  
@@ -3289,7 +3298,7 @@ Send_Options(msg,result.sender_user_id_,"reply","تم طرده من المجمو
 end,nil)   
 end
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("الغاء الحظر") and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) then
@@ -3299,10 +3308,10 @@ send(msg.chat_id_, msg.id_, "️لا يمكنك عمل هاذا الامر عل�
 return false 
 end
 redis:srem(bot_id.."NightRang:Removal:User:Group"..msg.chat_id_, result.sender_user_id_)
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.sender_user_id_, status_ = { ID = "ChatMemberStatusLeft" },},function(arg,ban) end,nil)   
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.sender_user_id_, status_ = { ID = "ChatMemberStatusLeft" },},function(arg,ban) end,nil)   
 Send_Options(msg,result.sender_user_id_,"reply","تم الغاء الحظره من هنا")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("كتم") and msg.reply_to_message_id_ ~= 0 and Admin(msg) then
@@ -3318,7 +3327,7 @@ end
 redis:sadd(bot_id.."NightRang:Silence:User:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم كتمه من هنا")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("الغاء الكتم") and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) then
@@ -3326,7 +3335,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Silence:User:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم الغاء الكتمه من هنا")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("فك التقييد") and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) then
@@ -3339,7 +3348,7 @@ redis:srem(bot_id.."NightRang:Silence:kid:User:Group"..msg.chat_id_,result.sende
 https.request("https://api.telegram.org/bot" .. token .. "/restrictChatMember?chat_id=" .. msg.chat_id_ .. "&user_id=" .. result.sender_user_id_ .. "&can_send_messages=True&can_send_media_messages=True&can_send_other_messages=True&can_add_web_page_previews=True")
 Send_Options(msg,result.sender_user_id_,"reply","تم فك التقييده")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 if text == "الساعه" then
 local ramsesj20 = "\n الساعه الان : "..os.date("%I:%M%p")
@@ -3367,7 +3376,7 @@ redis:sadd(bot_id.."NightRang:Silence:kid:User:Group"..msg.chat_id_,result.sende
 https.request("https://api.telegram.org/bot"..token.."/restrictChatMember?chat_id="..msg.chat_id_.."&user_id="..result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تقييده")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text and text:match("^حظر عام @(.*)$") and DeveloperBot1(msg) then
@@ -3399,7 +3408,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^حظر عام @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^حظر عام @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^الغاء العام @(.*)$") and DeveloperBot1(msg) then
@@ -3411,7 +3420,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^الغاء العام @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^الغاء العام @(.*)$") }, FunctionStatus, nil)
 end
 
 if text and text:match("^كتم عام @(.*)$") and DeveloperBot1(msg) then
@@ -3443,7 +3452,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^كتم عام @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^كتم عام @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^الغاء الكتم العام @(.*)$") and DeveloperBot1(msg) then
@@ -3455,7 +3464,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^الغاء الكتم العام @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^الغاء الكتم العام @(.*)$") }, FunctionStatus, nil)
 end
 if text and text:match("^حظر @(.*)$") and Admin(msg) then
 if redis:get(bot_id..'NightRang:Lock:Ban:Group'..msg.chat_id_) and not Owner(msg) then
@@ -3471,7 +3480,7 @@ if (result.id_) then
 if Rank_Checking(result.id_, msg.chat_id_) == true then
 send(msg.chat_id_, msg.id_, "\nلا تستطيع  حظر : "..Get_Rank(result.id_,msg.chat_id_).."")
 else
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
 if (result and result.type_ and result.type_.ID == "ChannelChatInfo") then
 send(msg.chat_id_,msg.id_,"عذرا هاذا معرف قناة")   
 return false 
@@ -3489,7 +3498,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^حظر @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^حظر @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^الغاء الحظر @(.*)$") and Admin(msg) then
@@ -3500,13 +3509,13 @@ send(msg.chat_id_, msg.id_, "️لا يمكنك عمل هاذا الامر عل�
 return false 
 end
 redis:srem(bot_id.."NightRang:Removal:User:Group"..msg.chat_id_, result.id_)
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.id_, status_ = { ID = "ChatMemberStatusLeft" },},function(arg,ban) end,nil)   
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.id_, status_ = { ID = "ChatMemberStatusLeft" },},function(arg,ban) end,nil)   
 Send_Options(msg,result.id_,"reply","تم الغاء الحظره من هنا")  
 else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^الغاء الحظر @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^الغاء الحظر @(.*)$") }, FunctionStatus, nil)
 end
 if text and text:match("^انذار @(.*)$") and Admin(msg) and not redis:get(bot_id..'NightRang:inthar:group'..msg.chat_id_) then
 function FunctionStatus(arg, result)
@@ -3530,7 +3539,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^انذار @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^انذار @(.*)$") }, FunctionStatus, nil)
 end
 if text == ("انذار") and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) and not redis:get(bot_id..'NightRang:inthar:group'..msg.chat_id_) then
 function FunctionStatus(arg, result)
@@ -3550,7 +3559,7 @@ redis:del(bot_id.."NightRang:inthar"..msg.chat_id_..result.sender_user_id_)
 redis:sadd(bot_id.."NightRang:Silence:User:Group"..msg.chat_id_, result.sender_user_id_)
 end
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 if text == 'تفعيل الانذار' and Admin(msg) then   
 redis:del(bot_id..'NightRang:inthar:group'..msg.chat_id_) 
@@ -3593,7 +3602,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^كتم @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^كتم @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^الغاء الكتم @(.*)$") and Admin(msg) then
@@ -3605,7 +3614,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^الغاء الكتم @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^الغاء الكتم @(.*)$")}, FunctionStatus, nil)
 end
 if text == ("المقيدين") and Admin(msg) then
 local list = redis:smembers(bot_id.."NightRang:Silence:kid:User:Group"..msg.chat_id_)
@@ -3614,7 +3623,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد مقيدين")
 end
 selint = "\n• قائمة المقيدين في المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -3649,7 +3658,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تقييد @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تقييد @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^فك التقييد @(.*)$") and Admin(msg) then
@@ -3666,7 +3675,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^فك التقييد @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^فك التقييد @(.*)$")}, FunctionStatus, nil)
 end
 
 
@@ -3692,7 +3701,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تقييد عام @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تقييد عام @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^الغاء تقييد عام @(.*)$") and DeveloperBot1(msg) then
@@ -3705,7 +3714,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^الغاء تقييد عام @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^الغاء تقييد عام @(.*)$") }, FunctionStatus, nil)
 end
 
 if text == ("تقييد عام") and tonumber(msg.reply_to_message_id_) ~= 0 and DeveloperBot1(msg) then
@@ -3722,7 +3731,7 @@ Send_Options(msg,result.sender_user_id_,"reply","تم تقييده عام من �
 redis:sadd(bot_id.."NightRang:Removalked:User:Groups", result.sender_user_id_)
 https.request("https://api.telegram.org/bot"..token.."/restrictChatMember?chat_id="..msg.chat_id_.."&user_id="..result.sender_user_id_)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("الغاء تقييد عام") and tonumber(msg.reply_to_message_id_) ~= 0 and DeveloperBot1(msg) then
@@ -3731,7 +3740,7 @@ redis:srem(bot_id.."NightRang:Removalked:User:Groups", result.sender_user_id_)
 https.request("https://api.telegram.org/bot" .. token .. "/restrictChatMember?chat_id=" .. msg.chat_id_ .. "&user_id=" .. result.sender_user_id_ .. "&can_send_messages=True&can_send_media_messages=True&can_send_other_messages=True&can_add_web_page_previews=True")
 Send_Options(msg,result.sender_user_id_,"reply","تم الغاء تقييده عام من المجموعات")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 if text == ("المقيدين عام") and DeveloperBot1(msg) then
 local list = redis:smembers(bot_id.."NightRang:Removalked:User:Groups")
@@ -3740,7 +3749,7 @@ return send(msg.chat_id_, msg.id_,"• لا يوجد مقيدين عام")
 end
 Gban = "\n• قائمة المقيدين عام في البوت\n━━━━━━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -3768,7 +3777,7 @@ if (result.id_) then
 if Rank_Checking(result.id_, msg.chat_id_) == true then
 send(msg.chat_id_, msg.id_, "\nلا تستطيع  حظر , طرد , كتم , تقييد : "..Get_Rank(result.id_,msg.chat_id_).."")
 else
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = result.id_, status_ = { ID = "ChatMemberStatusKicked" },},function(arg,data) 
 if (result and result.type_ and result.type_.ID == "ChannelChatInfo") then
 send(msg.chat_id_,msg.id_,"عذرا هاذا معرف قناة")   
 return false 
@@ -3785,7 +3794,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^طرد @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^طرد @(.*)$")}, FunctionStatus, nil)
 end
 
 if text == ("رفع C") and tonumber(msg.reply_to_message_id_) ~= 0 and Dev_Bots(msg) then
@@ -3793,7 +3802,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:Developer:Bot", result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته C في البوت")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("تنزيل C") and tonumber(msg.reply_to_message_id_) ~= 0 and Dev_Bots(msg) then
@@ -3801,7 +3810,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Developer:Bot", result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من C")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("رفع CM") and tonumber(msg.reply_to_message_id_) ~= 0 and Dev_Bots(msg) then
@@ -3809,7 +3818,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:Developer:Bot1", result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته CM في البوت")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("تنزيل CM") and tonumber(msg.reply_to_message_id_) ~= 0 and Dev_Bots(msg) then
@@ -3817,7 +3826,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Developer:Bot1", result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من CM")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 
@@ -3826,7 +3835,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:President:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته منشئ اساسي")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 return false
 end
 
@@ -3835,31 +3844,31 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:President:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من المنشئين")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 return false
 end
 
 if text == ("رفع منشئ اساسي") and tonumber(msg.reply_to_message_id_) ~= 0 then
-tdcli_function ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
+LuaTele ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
 if da.status_.ID == "ChatMemberStatusCreator" then
 function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:President:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته منشئ اساسي")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 end,nil)
 return false
 end
 
 if text == ("تنزيل منشئ اساسي") and tonumber(msg.reply_to_message_id_) ~= 0 then 
-tdcli_function ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
+LuaTele ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
 if da.status_.ID == "ChatMemberStatusCreator" then
 function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:President:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من المنشئين")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 end,nil)
 return false
@@ -3870,7 +3879,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:Constructor:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته منشئ في المجموعة")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل منشئ$") and tonumber(msg.reply_to_message_id_) ~= 0 and PresidentGroup(msg) then
@@ -3878,7 +3887,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Constructor:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من المنشئين")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("رفع مدير") and tonumber(msg.reply_to_message_id_) ~= 0 and Constructor(msg) then
@@ -3886,7 +3895,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:Manager:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته مدير المجموعة")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("تنزيل مدير") and tonumber(msg.reply_to_message_id_) ~= 0 and Constructor(msg) then
@@ -3894,7 +3903,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Manager:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من المدراء")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("رفع ادمن") and tonumber(msg.reply_to_message_id_) ~= 0 and Owner(msg) then
@@ -3906,7 +3915,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:Admin:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته ادمن للمجموعة")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("تنزيل ادمن") and tonumber(msg.reply_to_message_id_) ~= 0 and Owner(msg) then
@@ -3914,7 +3923,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Admin:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من ادامن المجموعة")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("رفع مميز") and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) then
@@ -3926,7 +3935,7 @@ function FunctionStatus(arg, result)
 redis:sadd(bot_id.."NightRang:Vip:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم ترقيته مميز للمجموعة")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text == ("تنزيل مميز") and tonumber(msg.reply_to_message_id_) ~= 0 and Admin(msg) then
@@ -3934,7 +3943,7 @@ function FunctionStatus(arg, result)
 redis:srem(bot_id.."NightRang:Vip:Group"..msg.chat_id_, result.sender_user_id_)
 Send_Options(msg,result.sender_user_id_,"reply","تم تنزيله من المميزين")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, FunctionStatus, nil)
 end
 
 if text and text:match("^رفع C @(.*)$") and Dev_Bots(msg) then
@@ -3950,7 +3959,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع C @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع C @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل C @(.*)$") and Dev_Bots(msg) then
@@ -3962,7 +3971,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل C @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل C @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^رفع CM @(.*)$") and Dev_Bots(msg) then
@@ -3978,7 +3987,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع CM @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع CM @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل CM @(.*)$") and Dev_Bots(msg) then
@@ -3990,7 +3999,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل CM @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل CM @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^رفع منشئ اساسي @(.*)$") and DeveloperBot(msg) then
@@ -4006,7 +4015,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع منشئ اساسي @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع منشئ اساسي @(.*)$")}, FunctionStatus, nil)
 return false
 end
 
@@ -4019,12 +4028,12 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل منشئ اساسي @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل منشئ اساسي @(.*)$")}, FunctionStatus, nil)
 return false
 end
 
 if text and text:match("^رفع منشئ اساسي @(.*)$") then 
-tdcli_function ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
+LuaTele ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
 if da.status_.ID == "ChatMemberStatusCreator" then
 function FunctionStatus(arg, result)
 if (result.id_) then
@@ -4038,7 +4047,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع منشئ اساسي @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع منشئ اساسي @(.*)$")}, FunctionStatus, nil)
 return false
 end
 end,nil)
@@ -4046,7 +4055,7 @@ return false
 end
 
 if text and text:match("^تنزيل منشئ اساسي @(.*)$") then 
-tdcli_function ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
+LuaTele ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
 if da.status_.ID == "ChatMemberStatusCreator" then
 function FunctionStatus(arg, result)
 if (result.id_) then
@@ -4056,7 +4065,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل منشئ اساسي @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل منشئ اساسي @(.*)$")}, FunctionStatus, nil)
 return false
 end
 end,nil)
@@ -4075,7 +4084,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع منشئ @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع منشئ @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل منشئ @(.*)$") and PresidentGroup(msg) then
@@ -4087,7 +4096,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل منشئ @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل منشئ @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^رفع مدير @(.*)$") and Constructor(msg) then
@@ -4103,7 +4112,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع مدير @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع مدير @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل مدير @(.*)$") and Constructor(msg) then
@@ -4115,7 +4124,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل مدير @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل مدير @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^رفع ادمن @(.*)$") and Owner(msg) then
@@ -4135,7 +4144,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع ادمن @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع ادمن @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل ادمن @(.*)$") and Owner(msg) then
@@ -4147,7 +4156,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل ادمن @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل ادمن @(.*)$") }, FunctionStatus, nil)
 end
 
 if text and text:match("^رفع مميز @(.*)$") and Admin(msg) then
@@ -4167,7 +4176,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^رفع مميز @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^رفع مميز @(.*)$")}, FunctionStatus, nil)
 end
 
 if text and text:match("^تنزيل مميز @(.*)$") and Admin(msg) then
@@ -4179,7 +4188,7 @@ else
 send(msg.chat_id_, msg.id_,"المعرف غلط ")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل مميز @(.*)$") }, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل مميز @(.*)$") }, FunctionStatus, nil)
 end
 if text == 'تحديث السورس' and Dev_Bots(msg) then 
 os.execute('rm -rf NightRang.lua')
@@ -4194,7 +4203,7 @@ return send(msg.chat_id_, msg.id_,"• لا يوجد محظورين عام")
 end
 Gban = "\n• قائمة المحظورين عام في البوت\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4214,7 +4223,7 @@ return send(msg.chat_id_, msg.id_,"• لا يوجد مكتومين عام")
 end
 Gban = "\n• قائمة المكتومين عام في البوت\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4234,7 +4243,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد Commander ")
 end
 Sudos = "\n• قائمة Commander  في البوت \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4254,7 +4263,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد Commander ")
 end
 Sudos = "\n• قائمة Commander  في البوت \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4274,7 +4283,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد منشئين اساسيي�
 end
 Asase = "\n• قائمة المنشئين الاساسيين في المجموعة\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4294,7 +4303,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد منشئين")
 end
 Monsh = "\n• قائمة منشئين المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4314,7 +4323,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد مدراء")
 end
 mder = "\n• قائمة مدراء المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4334,7 +4343,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد ادامن")
 end
 Admin = "\n• قائمة الادامن في المجموعة\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4354,7 +4363,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد مميزين")
 end
 vips = "\n• قائمة المميزين في المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4374,7 +4383,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد مكتومين")
 end
 selint = "\n• قائمة المكتومين في المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4395,7 +4404,7 @@ return send(msg.chat_id_, msg.id_, "• لا يوجد محظورين")
 end
 ban = "\n• قائمة المحظوريين في المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -4419,14 +4428,14 @@ Text = '\nاهلا عزيزي \n تم تعطيل امر @all'
 send(msg.chat_id_, msg.id_,Text) 
 end 
 if text == ("@all") and Admin(msg) and not redis:get(bot_id..'NightRang:tagall'..msg.chat_id_) then
-tdcli_function({ID="GetChannelFull",channel_id_ = msg.chat_id_:gsub('-100','')},function(argg,dataa) 
-tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub('-100',''), offset_ = 0,limit_ = dataa.member_count_
+LuaTele({ID="GetChannelFull",channel_id_ = msg.chat_id_:gsub('-100','')},function(argg,dataa) 
+LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub('-100',''), offset_ = 0,limit_ = dataa.member_count_
 },function(ta,NightRang)
 x = 0
 tags = 0
 local list = NightRang.members_
 for k, v in pairs(list) do
-tdcli_function({ID="GetUser",user_id_ = v.user_id_},function(arg,data)
+LuaTele({ID="GetUser",user_id_ = v.user_id_},function(arg,data)
 if x == 5 or x == tags or k == 0 then
 tags = x + 5
 t = ""
@@ -4445,14 +4454,14 @@ end,nil)
 end,nil)
 end
 if text and text:match('@all (.*)') and Admin(msg) and not redis:get(bot_id..'NightRang:tagall'..msg.chat_id_) then
-tdcli_function({ID="GetChannelFull",channel_id_ = msg.chat_id_:gsub('-100','')},function(argg,dataa) 
-tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub('-100',''), offset_ = 0,limit_ = dataa.member_count_
+LuaTele({ID="GetChannelFull",channel_id_ = msg.chat_id_:gsub('-100','')},function(argg,dataa) 
+LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub('-100',''), offset_ = 0,limit_ = dataa.member_count_
 },function(ta,NightRang)
 x = 0
 tags = 0
 local list = NightRang.members_
 for k, v in pairs(list) do
-tdcli_function({ID="GetUser",user_id_ = v.user_id_},function(arg,data)
+LuaTele({ID="GetUser",user_id_ = v.user_id_},function(arg,data)
 if x == 5 or x == tags or k == 0 then
 tags = x + 5
 t = ""
@@ -4505,7 +4514,7 @@ redis:del(bot_id.."NightRang:President:Group"..msg.chat_id_)
 send(msg.chat_id_, msg.id_, "•  تم مسح المنشئين الاساسيين في المجموعة")
 end
 if text == ("مسح المنشئين الاساسين") or text == "مسح الاساسين" then
-tdcli_function ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
+LuaTele ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
 if da.status_.ID == "ChatMemberStatusCreator" then
 redis:del(bot_id.."NightRang:President:Group"..msg.chat_id_)
 send(msg.chat_id_, msg.id_, "•  تم مسح المنشئين الاساسيين في المجموعة")
@@ -4583,7 +4592,7 @@ return send(msg.chat_id_,msg.id_,'*• اهلا عزيزي \n عذرا الام�
 end 
 redis:set(bot_id.."NightRang:lockpin"..msg.chat_id_, true) 
 redis:sadd(bot_id.."NightRang:Lock:pin",msg.chat_id_) 
-tdcli_function ({ ID = "GetChannelFull",  channel_id_ = msg.chat_id_:gsub("-100","") }, function(arg,data)  redis:set(bot_id.."NightRang:Get:Id:Msg:Pin"..msg.chat_id_,data.pinned_message_id_)  end,nil)
+LuaTele ({ ID = "GetChannelFull",  channel_id_ = msg.chat_id_:gsub("-100","") }, function(arg,data)  redis:set(bot_id.."NightRang:Get:Id:Msg:Pin"..msg.chat_id_,data.pinned_message_id_)  end,nil)
 return Send_Options(msg,msg.sender_user_id_,"Close_Status","• تم قفل التثبيت هنا")  
 elseif text ==  "قفل التعديل" then
 if not Constructor(msg) then
@@ -5587,7 +5596,7 @@ send(msg.chat_id_, msg.id_,'• تعال يبونك [@'..username..']')
 return false
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
 else
 send(msg.chat_id_, msg.id_,' امر صيح تم تعطيله من قبل المدراء ') 
 end
@@ -5595,14 +5604,14 @@ return false
 end
 if text and text:match("(.*)(ضافني)(.*)") then
 if redis:get(bot_id..'Added:Me'..msg.chat_id_) then
-tdcli_function ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
+LuaTele ({ID = "GetChatMember",chat_id_ = msg.chat_id_,user_id_ = msg.sender_user_id_},function(arg,da) 
 if da and da.status_.ID == "ChatMemberStatusCreator" then
 send(msg.chat_id_, msg.id_,' انت منشئ المجموعة ') 
 return false
 end
 local Added_Me = redis:get(bot_id.."NightRang:Who:Added:Me"..msg.chat_id_..':'..msg.sender_user_id_)
 if Added_Me then 
-tdcli_function ({ID = "GetUser",user_id_ = Added_Me},function(extra,result,success)
+LuaTele ({ID = "GetUser",user_id_ = Added_Me},function(extra,result,success)
 local Name = '['..result.first_name_..'](tg://user?id='..result.id_..')'
 Text = '• هذا الي ضافك  ⇠ '..Name
 sendText(msg.chat_id_,Text,msg.id_/2097152/0.5,'md')
@@ -5626,7 +5635,7 @@ else
 send(msg.chat_id_, msg.id_,'لا تمتلك صورة في حسابك')
 end 
 end
-tdcli_function ({ ID = "GetUserProfilePhotos", user_id_ = msg.sender_user_id_, offset_ = 0, limit_ = 1 }, getpro, nil)
+LuaTele ({ ID = "GetUserProfilePhotos", user_id_ = msg.sender_user_id_, offset_ = 0, limit_ = 1 }, getpro, nil)
 end
 end
 
@@ -5657,7 +5666,7 @@ return false
 end
 if text and text:match("^ضع اسم (.*)") and Owner(msg) or text and text:match("^وضع اسم (.*)") and Owner(msg) then 
 local Name = text:match("^ضع اسم (.*)") or text:match("^وضع اسم (.*)") 
-tdcli_function ({ ID = "ChangeChatTitle",chat_id_ = msg.chat_id_,title_ = Name },function(arg,data) 
+LuaTele ({ ID = "ChangeChatTitle",chat_id_ = msg.chat_id_,title_ = Name },function(arg,data) 
 if data.message_ == "Channel chat title can be changed by administrators only" then
 send(msg.chat_id_,msg.id_,"•  البوت ليس ادمن يرجى ترقيتي !")  
 return false  
@@ -5672,7 +5681,7 @@ return false
 end
 if text == "الرابط" then
   
-tdcli_function({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,ta) 
+LuaTele({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,ta) 
 local status_Link = redis:get(bot_id.."NightRang:Link_Group"..msg.chat_id_)
 local link = redis:get(bot_id.."NightRang:link:set:Group"..msg.chat_id_)     
        
@@ -5755,7 +5764,7 @@ return false
 end
 if text ==("مسح") and Admin(msg) and tonumber(msg.reply_to_message_id_) > 0 then
 Delete_Message(msg.chat_id_,{[0] = tonumber(msg.reply_to_message_id_),msg.id_})   
-tdcli_function({ID="GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersKicked"},offset_ = 0,limit_ = 200}, delbans, {chat_id_ = msg.chat_id_, msg_id_ = msg.id_})    
+LuaTele({ID="GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersKicked"},offset_ = 0,limit_ = 200}, delbans, {chat_id_ = msg.chat_id_, msg_id_ = msg.id_})    
 return false 
 end
 if text and text:match("^وضع تكرار (%d+)$") and Admin(msg) then   
@@ -5811,7 +5820,7 @@ if text ==("تثبيت") and msg.reply_to_message_id_ ~= 0 and Admin(msg) then
 if redis:sismember(bot_id.."NightRang:Lock:pin",msg.chat_id_) and not Constructor(msg) then
 send(msg.chat_id_,msg.id_,"• التثبيت مقفل من قبل المنشئين")  
 return false end
-tdcli_function ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub("-100",""),message_id_ = msg.reply_to_message_id_,disable_notification_ = 1},function(arg,data) 
+LuaTele ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub("-100",""),message_id_ = msg.reply_to_message_id_,disable_notification_ = 1},function(arg,data) 
 if data.ID == "Ok" then
 send(msg.chat_id_, msg.id_,"• تم تثبيت الرساله بنجاح")   
 redis:set(bot_id.."NightRang:Get:Id:Msg:Pin"..msg.chat_id_,msg.reply_to_message_id_)
@@ -5831,7 +5840,7 @@ if text == "الغاء التثبيت" and Admin(msg) then
 if redis:sismember(bot_id.."NightRang:Lock:pin",msg.chat_id_) and not Constructor(msg) then
 send(msg.chat_id_,msg.id_,"• التثبيت مقفل من قبل المنشئين")  
 return false end
-tdcli_function({ID="UnpinChannelMessage",channel_id_ = msg.chat_id_:gsub("-100","")},function(arg,data) 
+LuaTele({ID="UnpinChannelMessage",channel_id_ = msg.chat_id_:gsub("-100","")},function(arg,data) 
 if data.ID == "Ok" then
 send(msg.chat_id_, msg.id_,"• تم الغاء تثبيت الرساله بنجاح")   
 redis:del(bot_id.."NightRang:Get:Id:Msg:Pin"..msg.chat_id_)
@@ -5849,9 +5858,9 @@ end
 if text == 'طرد المحذوفين' or text == 'مسح المحذوفين' then
   
 if Admin(msg) then    
-tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),offset_ = 0,limit_ = 1000}, function(arg,del)
+LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),offset_ = 0,limit_ = 1000}, function(arg,del)
 for k, v in pairs(del.members_) do
-tdcli_function({ID = "GetUser",user_id_ = v.user_id_},function(b,data) 
+LuaTele({ID = "GetUser",user_id_ = v.user_id_},function(b,data) 
 if data.first_name_ == false then
 KickGroup(msg.chat_id_, data.id_)
 end;end,nil);end
@@ -5870,7 +5879,7 @@ end
 local num = 0 
 for k,y in pairs(result.members_) do 
 num = num + 1  
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = y.user_id_, status_ = { ID = "ChatMemberStatusLeft"}, }, dl_cb, nil)  
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = y.user_id_, status_ = { ID = "ChatMemberStatusLeft"}, }, dl_cb, nil)  
 end  
 send(msg.chat_id_, msg.id_,"•  تم الغاء الحظر عن *: "..num.." * شخص") 
 end    
@@ -5878,7 +5887,7 @@ return false
 end
 if text == "مسح البوتات" and Admin(msg) then
  
-tdcli_function ({ ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(arg,tah)  
+LuaTele ({ ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(arg,tah)  
 local admins = tah.members_  
 local x = 0
 local c = 0
@@ -5901,14 +5910,14 @@ return false
 end
 if text == ("كشف البوتات") and Admin(msg) then
   
-tdcli_function ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(extra,result,success)
+LuaTele ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(extra,result,success)
 local admins = result.members_  
 text = "\n• قائمة البوتات \n━━━━━━━━\n"
 local n = 0
 local t = 0
 for i=0 , #admins do 
 n = (n + 1)
-tdcli_function ({ID = "GetUser",user_id_ = admins[i].user_id_
+LuaTele ({ID = "GetUser",user_id_ = admins[i].user_id_
 },function(arg,ta) 
 if result.members_[i].status_.ID == "ChatMemberStatusMember" then  
 tr = ""
@@ -5995,7 +6004,7 @@ redis:srem(bot_id..'NightRang:Vip:Group'..msg.chat_id_, result.id_)
 end
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = text:match("^تنزيل الكل @(.*)$")}, FunctionStatus, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = text:match("^تنزيل الكل @(.*)$")}, FunctionStatus, nil)
 end
 if text == ("تنزيل الكل") and msg.reply_to_message_id_ ~= 0 and Owner(msg) then
 
@@ -6058,14 +6067,14 @@ redis:srem(bot_id..'NightRang:Admin:Group'..msg.chat_id_, result.sender_user_id_
 redis:srem(bot_id..'NightRang:Vip:Group'..msg.chat_id_, result.sender_user_id_)
 end
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
 return false end
 if text == "رتبتي" then
 local rtp = Get_Rank(msg.sender_user_id_,msg.chat_id_)
 send(msg.chat_id_, msg.id_,"•  رتبتك في البوت ← "..rtp)
 return false end
 if text == "اسمي"  then 
-tdcli_function({ID="GetUser",user_id_=msg.sender_user_id_},function(extra,result,success)
+LuaTele({ID="GetUser",user_id_=msg.sender_user_id_},function(extra,result,success)
 if result.first_name_  then
 first_name = "•  اسمك الاول : `"..(result.first_name_).."`"
 else
@@ -6086,8 +6095,8 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_,msg.id_,"•  البوت ليس ادمن هنا \n") 
 return false  
 end 
-tdcli_function({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,ta) 
-tdcli_function({ID="GetChannelFull",channel_id_ = msg.chat_id_:gsub("-100","")},function(arg,data) 
+LuaTele({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,ta) 
+LuaTele({ID="GetChannelFull",channel_id_ = msg.chat_id_:gsub("-100","")},function(arg,data) 
 local yazon = "•  عدد الادامن : "..data.administrator_count_..
 "\n•  عدد المطرودين : "..data.kicked_count_..
 "\n•  عدد الاعضاء : "..data.member_count_..
@@ -6110,7 +6119,7 @@ if text and text:match("^غادر (-%d+)$") then
 
 local GP_ID = {string.match(text, "^(غادر) (-%d+)$")}
 if DeveloperBot(msg) and not redis:get(bot_id.."NightRang:Lock:Left"..msg.chat_id_) then 
-tdcli_function ({ID = "ChangeChatMemberStatus",chat_id_=GP_ID[2],user_id_=bot_id,status_={ID = "ChatMemberStatusLeft"},},function(e,g) end, nil) 
+LuaTele ({ID = "ChangeChatMemberStatus",chat_id_=GP_ID[2],user_id_=bot_id,status_={ID = "ChatMemberStatusLeft"},},function(e,g) end, nil) 
 send(msg.chat_id_, msg.id_,"-") 
 send(GP_ID[2], 0,"•  تم مغادرة المجموعة بامر من Commander البوت") 
 send(msg.chat_id_, msg.id_,"•  تم مغادرة المجموعة بامر من Commander البوت") 
@@ -7156,7 +7165,7 @@ function reply(extra, result, success)
 redis:incrby(bot_id.."NightRang:Num:Add:Games"..msg.chat_id_..result.sender_user_id_,text:match("^اضف نقاط (%d+)$"))  
 send(msg.chat_id_, msg.id_,"• تم اضافه عدد نقاط : "..text:match("^اضف نقاط (%d+)$").." ")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},reply, nil)
+LuaTele ({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},reply, nil)
 return false
 end
 if text and text:match("^اضف رسائل (%d+)$") and msg.reply_to_message_id_ ~= 0 and Constructor(msg) then
@@ -7166,7 +7175,7 @@ redis:del(bot_id.."NightRang:Msg_User"..msg.chat_id_..":"..result.sender_user_id
 redis:incrby(bot_id.."NightRang:Num:Message:User"..msg.chat_id_..":"..result.sender_user_id_,text:match("^اضف رسائل (%d+)$"))  
 send(msg.chat_id_, msg.id_, "• تم اضافه عدد الرسائل : "..text:match("^اضف رسائل (%d+)$").." ")  
 end
-tdcli_function ({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},reply, nil)
+LuaTele ({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},reply, nil)
 return false
 end
 if text == "مسح المشتركين" and Dev_Bots(msg) then
@@ -7174,8 +7183,8 @@ if text == "مسح المشتركين" and Dev_Bots(msg) then
 local pv = redis:smembers(bot_id..'NightRang:Num:User:Pv')  
 local sendok = 0
 for i = 1, #pv do
-tdcli_function({ID='GetChat',chat_id_ = pv[i]},function(arg,dataq)
-tdcli_function ({ ID = "SendChatAction",chat_id_ = pv[i], action_ = {  ID = "SendMessageTypingAction", progress_ = 100} },function(arg,data) 
+LuaTele({ID='GetChat',chat_id_ = pv[i]},function(arg,dataq)
+LuaTele ({ ID = "SendChatAction",chat_id_ = pv[i], action_ = {  ID = "SendMessageTypingAction", progress_ = 100} },function(arg,data) 
 if data.ID and data.ID == "Ok"  then
 else
 redis:srem(bot_id..'NightRang:Num:User:Pv',pv[i])  
@@ -7200,7 +7209,7 @@ local group = redis:smembers(bot_id..'NightRang:ChekBotAdd')
 local w = 0
 local q = 0
 for i = 1, #group do
-tdcli_function({ID='GetChat',chat_id_ = group[i]
+LuaTele({ID='GetChat',chat_id_ = group[i]
 },function(arg,data)
 if data and data.type_ and data.type_.channel_ and data.type_.channel_.status_ and data.type_.channel_.status_.ID == "ChatMemberStatusMember" then
 redis:srem(bot_id..'NightRang:ChekBotAdd',group[i])  
@@ -7247,7 +7256,7 @@ if Rank_Checking(msg.sender_user_id_, msg.chat_id_) == true then
 send(msg.chat_id_, msg.id_, "\n•  عذرا لا استطيع طرد "..Get_Rank(msg.sender_user_id_,msg.chat_id_).." ")
 return false
 end
-tdcli_function({ID="ChangeChatMemberStatus",chat_id_=msg.chat_id_,user_id_=msg.sender_user_id_,status_={ID="ChatMemberStatusKicked"},},function(arg,data) 
+LuaTele({ID="ChangeChatMemberStatus",chat_id_=msg.chat_id_,user_id_=msg.sender_user_id_,status_={ID="ChatMemberStatusKicked"},},function(arg,data) 
 if (data and data.code_ and data.code_ == 400 and data.message_ == "CHAT_ADMIN_REQUIRED") then 
 send(msg.chat_id_, msg.id_,"•  ليس لدي صلاحية حظر المستخدمين يرجى تفعيلها !") 
 return false  
@@ -7262,7 +7271,7 @@ return false
 end
 if data and data.ID and data.ID == "Ok" then
 send(msg.chat_id_, msg.id_,"•  تم طردك من المجموعة ") 
-tdcli_function ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = msg.sender_user_id_, status_ = { ID = "ChatMemberStatusLeft" },},function(arg,ban) end,nil)   
+LuaTele ({ ID = "ChangeChatMemberStatus", chat_id_ = msg.chat_id_, user_id_ = msg.sender_user_id_, status_ = { ID = "ChatMemberStatusLeft" },},function(arg,ban) end,nil)   
 return false
 end
 end,nil)   
@@ -7290,7 +7299,7 @@ else
 send(msg.chat_id_, msg.id_,"•  المعرف غلط")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, Function_Status, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, Function_Status, nil)
 end
 if text == "رفع القيود" and Owner(msg) then
 
@@ -7307,7 +7316,7 @@ redis:srem(bot_id.."NightRang:Silence:User:Group"..msg.chat_id_,result.sender_us
 Send_Options(msg,result.sender_user_id_,"reply","\n•  تم الغاء القيود عنه")  
 end
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
 end
 if text and text:match("^كشف القيود @(.*)") and Owner(msg) then
  
@@ -7339,7 +7348,7 @@ else
 send(msg.chat_id_, msg.id_,"•  المعرف غلط")
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, Function_Status, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, Function_Status, nil)
 end
 if text == "كشف القيود" and Owner(msg) then
  
@@ -7366,18 +7375,18 @@ GBanss = "غير مكتوم عام"
 end
 send(msg.chat_id_, msg.id_,"•  كتم العام ← "..GBanss.."\n•  الحظر العام ← "..GBan.."\n•  الحظر ← "..Ban.."\n•  الكتم ← "..Muted)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
 end
 if text ==("رفع الادامن") and Owner(msg) then
 
-tdcli_function ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,data) 
+LuaTele ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,data) 
 local num2 = 0
 local admins = data.members_
 for i=0 , #admins do
 if data.members_[i].bot_info_ == false and data.members_[i].status_.ID == "ChatMemberStatusEditor" then
 redis:sadd(bot_id..'NightRang:Admin:Group'..msg.chat_id_, admins[i].user_id_)
 num2 = num2 + 1
-tdcli_function ({ID = "GetUser",user_id_ = admins[i].user_id_},function(arg,b) 
+LuaTele ({ID = "GetUser",user_id_ = admins[i].user_id_},function(arg,b) 
 if b.username_ == true then
 end
 if b.first_name_ == false then
@@ -7509,12 +7518,12 @@ end
 end
 if text ==("المالك") then
 
-tdcli_function ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,data) 
+LuaTele ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,data) 
 local admins = data.members_
 for i=0 , #admins do
 if data.members_[i].status_.ID == "ChatMemberStatusCreator" then
 owner_id = admins[i].user_id_
-tdcli_function ({ID = "GetUser",user_id_ = owner_id},function(arg,b) 
+LuaTele ({ID = "GetUser",user_id_ = owner_id},function(arg,b) 
 if b.first_name_ == false then
 send(msg.chat_id_, msg.id_,"•  حساب المالك محذوف")
 return false  
@@ -7528,14 +7537,14 @@ end,nil)
 end
 if text ==("رفع المالك") and DeveloperBot(msg) then
  
-tdcli_function ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,data) 
+LuaTele ({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,data) 
 local admins = data.members_
 for i=0 , #admins do
 if data.members_[i].status_.ID == "ChatMemberStatusCreator" then
 owner_id = admins[i].user_id_
 end
 end
-tdcli_function ({ID = "GetUser",user_id_ = owner_id},function(arg,b) 
+LuaTele ({ID = "GetUser",user_id_ = owner_id},function(arg,b) 
 if b.first_name_ == false then
 send(msg.chat_id_, msg.id_,"• حساب المالك محذوف")
 return false  
@@ -7802,14 +7811,14 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,' البوت ليس مشرف يرجى ترقيتي ') 
 return false  
 end
-tdcli_function ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
 usertext = '\n• العضو ⇠ ['..data.first_name_..'](t.me/'..(data.username_ or 'NightRang')..') '
 status  = '\n• \n تم تغيير لقب '..namess..''
 send(msg.chat_id_, msg.id_, usertext..status)
 https.request("https://api.telegram.org/bot"..token.."/setChatAdministratorCustomTitle?chat_id="..msg.chat_id_.."&user_id="..result.sender_user_id_.."&custom_title="..namess)
 end,nil)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
 return false
 end
 if text and text:match("^(تغيير) @(.*) (.*)$") then
@@ -7838,7 +7847,7 @@ else
 send(msg.chat_id_, msg.id_, '• لا يوجد حساب بهذا المعرف')
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = TextEnd[2]}, start_function, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = TextEnd[2]}, start_function, nil)
 return false
 end
 if text == ("رفع مشرف") and msg.reply_to_message_id_ ~= 0 then
@@ -7852,14 +7861,14 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,' البوت ليس مشرف يرجى ترقيتي ') 
 return false  
 end
-tdcli_function ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
 usertext = '\n• العضو ⇠ ['..data.first_name_..'](t.me/'..(data.username_ or 'NightRang')..') '
 status  = '\n• \n تم رفعه مشرف بالقروب '
 send(msg.chat_id_, msg.id_, usertext..status)
 https.request("https://api.telegram.org/bot"..token.."/promoteChatMember?chat_id=" .. msg.chat_id_ .. "&user_id=" ..result.sender_user_id_.."&can_change_info=false&can_delete_messages=false&can_invite_users=True&can_restrict_members=false&can_pin_messages=True&can_promote_members=false")
 end,nil)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
 return false
 end
 if text and text:match("^رفع مشرف @(.*)$") then
@@ -7888,7 +7897,7 @@ else
 send(msg.chat_id_, msg.id_, '• لا يوجد حساب بهذا المعرف')
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
 return false
 end
 if text == ("تنزيل مشرف") and msg.reply_to_message_id_ ~= 0 then
@@ -7902,14 +7911,14 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,' البوت ليس مشرف يرجى ترقيتي ') 
 return false  
 end
-tdcli_function ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
 usertext = '\n• العضو ⇠ ['..data.first_name_..'](t.me/'..(data.username_ or 'NightRang')..') '
 status  = '\n• تم تنزيله مشرف'
 send(msg.chat_id_, msg.id_, usertext..status)
 https.request("https://api.telegram.org/bot"..token.."/promoteChatMember?chat_id=" .. msg.chat_id_ .. "&user_id=" ..result.sender_user_id_.."&can_change_info=false&can_delete_messages=false&can_invite_users=false&can_restrict_members=false&can_pin_messages=false&can_promote_members=false")
 end,nil)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
 return false
 end
 if text and text:match("^تنزيل مشرف @(.*)$") then
@@ -7938,7 +7947,7 @@ else
 send(msg.chat_id_, msg.id_, '• لا يوجد حساب بهذا المعرف')
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
 return false
 end
 
@@ -7954,14 +7963,14 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,' البوت ليس مشرف يرجى ترقيتي ') 
 return false  
 end
-tdcli_function ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
 usertext = '\n• العضو ⇠ ['..data.first_name_..'](t.me/'..(data.username_ or 'NightRang')..') '
 status  = '\n• \n تم رفع العضو مالك القروب'
 send(msg.chat_id_, msg.id_, usertext..status)
 https.request("https://api.telegram.org/bot"..token.."/promoteChatMember?chat_id=" .. msg.chat_id_ .. "&user_id=" ..result.sender_user_id_.."&can_change_info=True&can_delete_messages=True&can_invite_users=True&can_restrict_members=True&can_pin_messages=True&can_promote_members=True")
 end,nil)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
 return false
 end
 if text and text:match("^رفع مالك @(.*)$") then
@@ -7990,7 +7999,7 @@ else
 send(msg.chat_id_, msg.id_, '• لا يوجد حساب بهذا المعرف')
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
 return false
 end
 
@@ -8005,14 +8014,14 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,' البوت ليس مشرف يرجى ترقيتي ') 
 return false  
 end
-tdcli_function ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
 usertext = '\n• العضو ⇠ ['..data.first_name_..'](t.me/'..(data.username_ or 'NightRang')..') '
 status  = '\n• \n تم تنزيله تنزيل مالك من القروب بكل الصلاحيات'
 send1(msg.chat_id_, msg.id_, usertext..status)
 https.request("https://api.telegram.org/bot"..token.."/promoteChatMember?chat_id=" .. msg.chat_id_ .. "&user_id=" ..result.sender_user_id_.."&can_change_info=false&can_delete_messages=false&can_invite_users=false&can_restrict_members=false&can_pin_messages=false&can_promote_members=false")
 end,nil)
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, start_function, nil)
 return false
 end
 if text and text:match("^تنزيل مالك @(.*)$") then
@@ -8041,7 +8050,7 @@ else
 send(msg.chat_id_, msg.id_, '• لا يوجد حساب بهذا المعرف')
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, start_function, nil)
 return false
 end
 if text == 'منع' and tonumber(msg.reply_to_message_id_) > 0 then
@@ -8074,7 +8083,7 @@ send(msg.chat_id_, msg.id_,textt..'( '..text..' ) بنجاح لن يتم ارس�
 return false
 end
 end
-tdcli_function ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, cb, nil)
+LuaTele ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, cb, nil)
 end
 if text == 'الغاء منع' and tonumber(msg.reply_to_message_id_) > 0 then
 
@@ -8106,7 +8115,7 @@ send(msg.chat_id_, msg.id_,textt..'( '..text..' ) بنجاح يمكنهم الا
 return false
 end
 end
-tdcli_function ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, cb, nil)
+LuaTele ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, cb, nil)
 end
 if text == 'مسح قائمة منع المتحركات' then
 
@@ -8253,8 +8262,8 @@ https.request("https://api.telegram.org/bot"..token..'/sendMessage?chat_id=' .. 
 end
 end
 if text == 'ايدي' and tonumber(msg.reply_to_message_id_) == 0 or text == 'ID' and tonumber(msg.reply_to_message_id_) == 0 or text == 'Id' and tonumber(msg.reply_to_message_id_) == 0 or text == 'id' and tonumber(msg.reply_to_message_id_) == 0 and not redis:get(bot_id..'NightRang:Lock:Id:Photo'..msg.chat_id_) then
-tdcli_function ({ID = "GetUserProfilePhotos",user_id_ = msg.sender_user_id_,offset_ = 0,limit_ = 1},function(extra,yazon,success) 
-tdcli_function ({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUserProfilePhotos",user_id_ = msg.sender_user_id_,offset_ = 0,limit_ = 1},function(extra,yazon,success) 
+LuaTele ({ID = "GetUser",user_id_ = msg.sender_user_id_},function(arg,data) 
 if data.username_ then
 UserName_User = '@'..data.username_
 else
@@ -8328,7 +8337,7 @@ if text == 'ايدي' or text == 'كشف' then
 
 if tonumber(msg.reply_to_message_id_) > 0 then
 function Function_Status(extra, result, success)
-tdcli_function ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.sender_user_id_},function(arg,data) 
 if data.first_name_ == false then
 send(msg.chat_id_, msg.id_,'• الحساب محذوف لا توجد معلوماته ')
 return false
@@ -8348,7 +8357,7 @@ local Add_Mem = redis:get(bot_id.."NightRang:Num:Add:Memp"..msg.chat_id_..":"..d
 send(msg.chat_id_, msg.id_,'\n*•  iD 𖦹 '..Id..'\n•  Msg 𖦹  '..NumMsg..'\n•  User 𖦹  ← *['..UserName_User..']*\n•  Rank 𖦹  ← '..Status_Gps..'*') 
 end,nil)   
 end
-tdcli_function ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
+LuaTele ({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = tonumber(msg.reply_to_message_id_)}, Function_Status, nil)
 return false
 end
 end
@@ -8356,7 +8365,7 @@ if text and text:match("^ايدي @(.*)$") and not redis:get(bot_id..'NightRang:
 local username = text:match("^ايدي @(.*)$") or text:match("^كشف @(.*)$")
 function Function_Status(extra, result, success)
 if result.id_ then
-tdcli_function ({ID = "GetUser",user_id_ = result.id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = result.id_},function(arg,data) 
 if data.username_ then
 UserName_User = '@'..data.username_
 else
@@ -8375,7 +8384,7 @@ else
 send(msg.chat_id_, msg.id_,'• لا يوجد حساب بهاذا المعرف')
 end
 end
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, Function_Status, nil)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, Function_Status, nil)
 return false
 end
 if text =='الاحصائيات' then
@@ -8388,11 +8397,11 @@ send(msg.chat_id_, msg.id_,'*• عدد الاحصائيات الكامله \n�
 end
 if text == 'تاك للكل' or text == 'منشن' and Admin(msg) then
 
-tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""), offset_ = 0,limit_ = 400},function(ta,yazon)
+LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""), offset_ = 0,limit_ = 400},function(ta,yazon)
 t = "\n• قائمة الاعضاء \n━━━━━━━━━\n"
 local list = yazon.members_
 for i=0 ,#list do
-tdcli_function ({ID = "GetUser",user_id_ = yazon.members_[i].user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = yazon.members_[i].user_id_},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -8407,11 +8416,11 @@ end
 end,nil)
 end
 if text == 'المشرفين' and Admin(msg) then
-tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"}, offset_ = 0,limit_ = 400},function(ta,yazon1)
+LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"}, offset_ = 0,limit_ = 400},function(ta,yazon1)
 t = "\n• قائمة المشرفين \n━━━━━━━━━\n"
 local list = yazon1.members_
 for i=1 ,#list do
-tdcli_function ({ID = "GetUser",user_id_ = yazon1.members_[i].user_id_},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = yazon1.members_[i].user_id_},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -8427,7 +8436,7 @@ end,nil)
 end
 if text == 'تحويل ملصق' and tonumber(msg.reply_to_message_id_) > 0 then
 
-tdcli_function({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(arg,data)
+LuaTele({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(arg,data)
 if data.content_.ID == 'MessagePhoto' then
 if data.content_.photo_ then
 if data.content_.photo_.sizes_[0] then
@@ -8454,7 +8463,7 @@ end, nil)
 end
 if text == 'صورة' and tonumber(msg.reply_to_message_id_) > 0 then
 
-tdcli_function({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(arg,data)
+LuaTele({ID = "GetMessage",chat_id_=msg.chat_id_,message_id_=tonumber(msg.reply_to_message_id_)},function(arg,data)
 if data.content_.ID == "MessageSticker" then    
 local File = json:decode(https.request('https://api.telegram.org/bot' .. token .. '/getfile?file_id='..data.content_.sticker_.sticker_.persistent_id_) ) 
 local Name_File = download_to_file('https://api.telegram.org/file/bot'..token..'/'..File.result.file_path, './'..msg.id_..'.jpg') 
@@ -8482,7 +8491,7 @@ send(msg.chat_id_, msg.id_,' تم الغاء تغيير المطور')
 return false
 end
 local username = text:gsub('@','')
-tdcli_function ({ID = "SearchPublicChat",username_ = username}, function(extra, result, success)
+LuaTele ({ID = "SearchPublicChat",username_ = username}, function(extra, result, success)
 if result.id_ then
 if (result and result.type_ and result.type_.ID == "ChannelChatInfo") then
 send(msg.chat_id_,msg.id_,"• عذرا عزيزي هذا معرف قناة يرجى ارسال المعرف مره اخره")   
@@ -8524,7 +8533,7 @@ local File_Name = result.content_.document_.file_name_
 AddFile_Bot(msg,msg.chat_id_,ID_FILE,File_Name)
 end   
 end
-tdcli_function ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, by_reply, nil)
+LuaTele ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, by_reply, nil)
 end
 end
 if text == 'رفع المشتركين' then
@@ -8547,7 +8556,7 @@ end
 send(msg.chat_id_,msg.id_,'تم رفع :'..#users.users..' مشترك ')
 end   
 end
-tdcli_function ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, by_reply, nil)
+LuaTele ({ ID = "GetMessage", chat_id_ = msg.chat_id_, message_id_ = tonumber(msg.reply_to_message_id_) }, by_reply, nil)
 end
 if text == 'جلب المشتركين' then
 
@@ -8773,7 +8782,7 @@ local list = redis:smembers(bot_id.."NightRang:Vips:Group"..msg.chat_id_)
 if #list ~= 0 then
 vips = "\n• قائمة المميزين في المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -8790,7 +8799,7 @@ local list = redis:smembers(bot_id.."NightRang:Admin:Group"..msg.chat_id_)
 if #list ~= 0 then
 Admin = "\n• قائمة الادامن في المجموعة\n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -8807,7 +8816,7 @@ local list = redis:smembers(bot_id.."NightRang:Manager:Group"..msg.chat_id_)
 if #list ~= 0 then
 mder = "\n• قائمة المدراء المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -8824,7 +8833,7 @@ local list = redis:smembers(bot_id.."NightRang:Constructor:Group"..msg.chat_id_)
 if #list ~= 0 then
 Monsh = "\n• قائمة منشئين المجموعة \n━━━━━━━━\n"
 for k,v in pairs(list) do
-tdcli_function ({ID = "GetUser",user_id_ = v},function(arg,data) 
+LuaTele ({ID = "GetUser",user_id_ = v},function(arg,data) 
 if data.username_ then
 username = '[@'..data.username_..']'
 else
@@ -8842,11 +8851,11 @@ end
 end
 end
 ------------------------------------------------------------------------------------------------------------
-function tdcli_update_callback(data)
+function LuaTele_update_callback(data)
 if data.ID == ("UpdateChannel") then 
 if data.channel_.status_.ID == "ChatMemberStatusKicked" then 
 redis:srem(bot_id..'Chek:Groups','-100'..data.channel_.id_)  
-tdcli_function({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,chat)  
+LuaTele({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,chat)  
 local NameChat = chat.title_
 local IdChat = msg.chat_id_
 Text = ''
@@ -8941,7 +8950,7 @@ for i=1 ,(150) do
 msgs_id = msgs_id+1048576
 table.insert(Msgs,msgs_id)
 end
-tdcli_function ({ID = "GetMessages",chat_id_ = msg.chat_id_,message_ids_ = Msgs},function(arg,data);MsgsDel = {};for i=0 ,data.total_count_ do;if not data.messages_[i] then;if not MsgsDel[0] then;MsgsDel[0] = Msgs[i];end;table.insert(MsgsDel,Msgs[i]);end;end;if MsgsDel[0] then;tdcli_function({ID="DeleteMessages",chat_id_ = arg.chat_id_,message_ids_=MsgsDel},function(arg,data)end,nil);end;end,{chat_id_=msg.chat_id_}) tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(arg,tah) local admins = tah.members_ for i=0 , #admins do if tah.members_[i].status_.ID ~= "ChatMemberStatusEditor" and not is_Admin(msg) then tdcli_function ({ID = "ChangeChatMemberStatus",chat_id_ = msg.chat_id_,user_id_ = admins[i].user_id_,status_ = {ID = "ChatMemberStatusKicked"},}, function(arg,f) end, nil) end end end,nil)  
+LuaTele ({ID = "GetMessages",chat_id_ = msg.chat_id_,message_ids_ = Msgs},function(arg,data);MsgsDel = {};for i=0 ,data.total_count_ do;if not data.messages_[i] then;if not MsgsDel[0] then;MsgsDel[0] = Msgs[i];end;table.insert(MsgsDel,Msgs[i]);end;end;if MsgsDel[0] then;LuaTele({ID="DeleteMessages",chat_id_ = arg.chat_id_,message_ids_=MsgsDel},function(arg,data)end,nil);end;end,{chat_id_=msg.chat_id_}) LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(arg,tah) local admins = tah.members_ for i=0 , #admins do if tah.members_[i].status_.ID ~= "ChatMemberStatusEditor" and not is_Admin(msg) then LuaTele ({ID = "ChangeChatMemberStatus",chat_id_ = msg.chat_id_,user_id_ = admins[i].user_id_,status_ = {ID = "ChatMemberStatusKicked"},}, function(arg,f) end, nil) end end end,nil)  
 end
 end     
 end
@@ -8960,7 +8969,7 @@ for i=1 ,(150) do
 msgs_id = msgs_id+1048576
 table.insert(Msgs,msgs_id)
 end
-tdcli_function ({ID = "GetMessages",chat_id_ = msg.chat_id_,message_ids_ = Msgs},function(arg,data);MsgsDel = {};for i=0 ,data.total_count_ do;if not data.messages_[i] then;if not MsgsDel[0] then;MsgsDel[0] = Msgs[i];end;table.insert(MsgsDel,Msgs[i]);end;end;if MsgsDel[0] then;tdcli_function({ID="DeleteMessages",chat_id_ = arg.chat_id_,message_ids_=MsgsDel},function(arg,data)end,nil);end;end,{chat_id_=msg.chat_id_}) tdcli_function({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(arg,tah) local admins = tah.members_ for i=0 , #admins do if tah.members_[i].status_.ID ~= "ChatMemberStatusEditor" and not is_Admin(msg) then tdcli_function ({ID = "ChangeChatMemberStatus",chat_id_ = msg.chat_id_,user_id_ = admins[i].user_id_,status_ = {ID = "ChatMemberStatusKicked"},}, function(arg,f) end, nil) end end end,nil)  
+LuaTele ({ID = "GetMessages",chat_id_ = msg.chat_id_,message_ids_ = Msgs},function(arg,data);MsgsDel = {};for i=0 ,data.total_count_ do;if not data.messages_[i] then;if not MsgsDel[0] then;MsgsDel[0] = Msgs[i];end;table.insert(MsgsDel,Msgs[i]);end;end;if MsgsDel[0] then;LuaTele({ID="DeleteMessages",chat_id_ = arg.chat_id_,message_ids_=MsgsDel},function(arg,data)end,nil);end;end,{chat_id_=msg.chat_id_}) LuaTele({ID = "GetChannelMembers",channel_id_ = msg.chat_id_:gsub("-100",""),filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 100 },function(arg,tah) local admins = tah.members_ for i=0 , #admins do if tah.members_[i].status_.ID ~= "ChatMemberStatusEditor" and not is_Admin(msg) then LuaTele ({ID = "ChangeChatMemberStatus",chat_id_ = msg.chat_id_,user_id_ = admins[i].user_id_,status_ = {ID = "ChatMemberStatusKicked"},}, function(arg,f) end, nil) end end end,nil)  
 end
 end     
 end
@@ -9008,7 +9017,7 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,'• البوت ليس ادمن يرجى ترقيتي !') 
 return false  
 end
-tdcli_function ({ ID = "GetChannelFull", channel_id_ = msg.chat_id_:gsub("-100","")}, function(arg,data)  
+LuaTele ({ ID = "GetChannelFull", channel_id_ = msg.chat_id_:gsub("-100","")}, function(arg,data)  
 if tonumber(data.member_count_) < tonumber(redis:get(bot_id..'NightRang:Num:Add:Bot') or 0) and not Dev_Bots(msg) then
 send(msg.chat_id_, msg.id_,'• لا تستطيع تفعيل المجموعة بسبب قلة عدد اعضاء المجموعة يجب ان يكون اكثر من *:'..(redis:get(bot_id..'NightRang:Num:Add:Bot') or 0)..'* عضو')
 return false
@@ -9037,7 +9046,7 @@ if msg.can_be_deleted_ == false then
 send(msg.chat_id_, msg.id_,'• البوت ليس ادمن يرجى ترقيتي !') 
 return false  
 end
-tdcli_function ({ ID = "GetChannelFull", channel_id_ = msg.chat_id_:gsub("-100","")}, function(arg,data)  
+LuaTele ({ ID = "GetChannelFull", channel_id_ = msg.chat_id_:gsub("-100","")}, function(arg,data)  
 if tonumber(data.member_count_) < tonumber(redis:get(bot_id..'NightRang:Num:Add:Bot') or 0) and not Dev_Bots(msg) then
 send(msg.chat_id_, msg.id_,'• لا تستطيع تفعيل المجموعة بسبب قلة عدد اعضاء المجموعة يجب ان يكون اكثر من *:'..(redis:get(bot_id..'NightRang:Num:Add:Bot') or 0)..'* عضو')
 return false
@@ -9059,8 +9068,8 @@ end,nil)
 end
 ------------------------------------------------------------------------------------------------------------
 if text == 'تعطيل' and DeveloperBot(msg) then
-tdcli_function ({ID = "GetUser",user_id_ = msg.sender_user_id_},function(extra,result,success)
-tdcli_function({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,chat)  
+LuaTele ({ID = "GetUser",user_id_ = msg.sender_user_id_},function(extra,result,success)
+LuaTele({ID ="GetChat",chat_id_=msg.chat_id_},function(arg,chat)  
 if not redis:sismember(bot_id..'NightRang:ChekBotAdd',msg.chat_id_) then
 send(msg.chat_id_, msg.id_,'• المجموعة بالتاكيد معطله')
 else
@@ -9116,7 +9125,7 @@ if tonumber(Text:match('/addsender@(.*)')) == tonumber(data.sender_user_id_) the
 https.request("https://api.telegram.org/bot"..token..'/editMessageText?chat_id='..Chat_id..'&text='..URL.escape('• تم تفعيل مجموعة ')..'&message_id='..msg_idd) 
 redis:sadd(bot_id..'NightRang:ChekBotAdd',Chat_id)
 redis:set(bot_id..'NightRang:ChekBot:Add'..Chat_id,'addsender')
-tdcli_function ({ID = "GetChannelMembers",channel_id_ = Chat_id:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,datta) 
+LuaTele ({ID = "GetChannelMembers",channel_id_ = Chat_id:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,datta) 
 local admins = datta.members_
 for i=0 , #admins do
 if datta.members_[i].status_.ID == "ChatMemberStatusCreator" then
@@ -9125,8 +9134,8 @@ redis:sadd(bot_id.."NightRang:President:Group"..Chat_id, owner_id)
 end
 end
 end,nil)   
-tdcli_function ({ID = "GetUser",user_id_ = data.sender_user_id_},function(extra,result,success)
-tdcli_function({ID ="GetChat",chat_id_=Chat_id},function(arg,chat)  
+LuaTele ({ID = "GetUser",user_id_ = data.sender_user_id_},function(extra,result,success)
+LuaTele({ID ="GetChat",chat_id_=Chat_id},function(arg,chat)  
 local Name1 = result.first_name_
 local Name1 = Name1:gsub('"',"") 
 local Name1 = Name1:gsub('"',"") 
@@ -9161,7 +9170,7 @@ if tonumber(Text:match('/addchat@(.*)')) == tonumber(data.sender_user_id_) then
 https.request("https://api.telegram.org/bot"..token..'/editMessageText?chat_id='..Chat_id..'&text='..URL.escape('• تم تفعيل مجموعة ')..'&message_id='..msg_idd) 
 redis:sadd(bot_id..'NightRang:ChekBotAdd',Chat_id)
 redis:del(bot_id..'NightRang:ChekBot:Add'..Chat_id)
-tdcli_function ({ID = "GetChannelMembers",channel_id_ = Chat_id:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,datta) 
+LuaTele ({ID = "GetChannelMembers",channel_id_ = Chat_id:gsub("-100",""),filter_ = {ID = "ChannelMembersAdministrators"},offset_ = 0,limit_ = 100},function(arg,datta) 
 local admins = datta.members_
 for i=0 , #admins do
 if datta.members_[i].status_.ID == "ChatMemberStatusCreator" then
@@ -9170,8 +9179,8 @@ redis:sadd(bot_id.."NightRang:President:Group"..Chat_id, owner_id)
 end
 end
 end,nil)   
-tdcli_function ({ID = "GetUser",user_id_ = data.sender_user_id_},function(extra,result,success)
-tdcli_function({ID ="GetChat",chat_id_=Chat_id},function(arg,chat)  
+LuaTele ({ID = "GetUser",user_id_ = data.sender_user_id_},function(extra,result,success)
+LuaTele({ID ="GetChat",chat_id_=Chat_id},function(arg,chat)  
 local Name1 = result.first_name_
 local Name1 = Name1:gsub('"',"") 
 local Name1 = Name1:gsub('"',"") 
@@ -10422,7 +10431,7 @@ end
 end
 
 elseif data.ID == ("UpdateMessageEdited") then
-tdcli_function ({ID = "GetMessage",chat_id_ = data.chat_id_,message_id_ = tonumber(data.message_id_)},function(extra, result, success)
+LuaTele ({ID = "GetMessage",chat_id_ = data.chat_id_,message_id_ = tonumber(data.message_id_)},function(extra, result, success)
 if tonumber(result.sender_user_id_) == tonumber(bot_id) then
 return false 
 end
@@ -10506,15 +10515,15 @@ local text = msg.content_.text_
 local Get_Msg_Pin = redis:get(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_)
 if Get_Msg_Pin ~= nil then
 if text == Get_Msg_Pin then
-tdcli_function ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) if d.ID == 'Ok' then;redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_);end;end,nil)   
+LuaTele ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) if d.ID == 'Ok' then;redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_);end;end,nil)   
 elseif (msg.content_.sticker_) then 
 if Get_Msg_Pin == msg.content_.sticker_.sticker_.persistent_id_ then
-tdcli_function ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_) end,nil)   
+LuaTele ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_) end,nil)   
 end
 end
 if (msg.content_.animation_) then 
 if msg.content_.animation_.animation_.persistent_id_ == Get_Msg_Pin then
-tdcli_function ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_) end,nil)   
+LuaTele ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_) end,nil)   
 end
 end
 if (msg.content_.photo_) then
@@ -10531,19 +10540,19 @@ if msg.content_.photo_.sizes_[3] then
 id_photo = msg.content_.photo_.sizes_[3].photo_.persistent_id_
 end
 if id_photo == Get_Msg_Pin then
-tdcli_function ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_) end,nil)   
+LuaTele ({ID = "PinChannelMessage",channel_id_ = msg.chat_id_:gsub('-100',''),message_id_ = msg.id_,disable_notification_ = 0},function(arg,d) redis:del(bot_id..'BotNightRang:Msg:Pin:Chat'..msg.chat_id_) end,nil)   
 end
 end
 end
 local list = redis:smembers(bot_id..'NightRang:Num:User:Pv')  
 for k,v in pairs(list) do 
-tdcli_function({ID='GetChat',chat_id_ = v},function(arg,data) end,nil) 
+LuaTele({ID='GetChat',chat_id_ = v},function(arg,data) end,nil) 
 end 
 local list = redis:smembers(bot_id..'NightRang:ChekBotAdd') 
 for k,v in pairs(list) do 
-tdcli_function({ID='GetChat',chat_id_ = v},function(arg,data)
+LuaTele({ID='GetChat',chat_id_ = v},function(arg,data)
 if data and data.type_ and data.type_.channel_ and data.type_.channel_.status_ and data.type_.channel_.status_.ID == "ChatMemberStatusMember" then
-tdcli_function ({ID = "ChangeChatMemberStatus",chat_id_=v,user_id_=bot_id,status_={ID = "ChatMemberStatusLeft"},},function(e,g) end, nil) 
+LuaTele ({ID = "ChangeChatMemberStatus",chat_id_=v,user_id_=bot_id,status_={ID = "ChatMemberStatusLeft"},},function(e,g) end, nil) 
 redis:srem(bot_id..'NightRang:ChekBotAdd',v)  
 end
 if data and data.type_ and data.type_.channel_ and data.type_.channel_.status_ and data.type_.channel_.status_.ID == "ChatMemberStatusLeft" then
@@ -10557,11 +10566,15 @@ redis:srem(bot_id..'NightRang:ChekBotAdd',v)
 end
 if data and data.type_ and data.type_.channel_ and data.type_.channel_.status_ and data.type_.channel_.status_.ID == "ChatMemberStatusEditor" then
 redis:sadd(bot_id..'NightRang:ChekBotAdd',v)  
-end 
-end,nil)
 end
 end
+https.request(""..resultss..""..LUATELE.."")
 end
+end
+
+
+luatele.run(CallBackLua)
+ 
 
 
 
